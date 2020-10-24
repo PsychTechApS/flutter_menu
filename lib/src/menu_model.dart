@@ -19,7 +19,8 @@ class MenuItem {
   });
 
   @override
-  String toString() => 'MenuItem(title: $title, isActive: $isActive, menuItemList: $menuListItems)';
+  String toString() =>
+      'MenuItem(title: $title, isActive: $isActive, menuItemList: $menuListItems)';
 }
 
 abstract class MenuListItemType {}

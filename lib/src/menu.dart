@@ -96,7 +96,8 @@ class MenuState extends State<Menu> {
 
   void _handleKeyEvent(RawKeyEvent event) {
     // only check on key down and only tjek if real key is involved
-    if (event.runtimeType == RawKeyDownEvent && event.logicalKey.keyLabel != '') {
+    if (event.runtimeType == RawKeyDownEvent &&
+        event.logicalKey.keyLabel != '') {
       widget.menuList.forEach((menuList) {
         menuList.menuListItems.forEach((listItem) {
           if (listItem is MenuListItem) {
@@ -160,8 +161,12 @@ class MenuState extends State<Menu> {
                                     children: [
                                       widget.leading,
                                       Padding(
-                                        padding: const EdgeInsets.only(left: 4, right: 4),
-                                        child: SizedBox(width: 2, child: Container(color: Colors.blueGrey[100])),
+                                        padding: const EdgeInsets.only(
+                                            left: 4, right: 4),
+                                        child: SizedBox(
+                                            width: 2,
+                                            child: Container(
+                                                color: Colors.blueGrey[100])),
                                       ),
                                     ],
                                   ),
@@ -169,9 +174,13 @@ class MenuState extends State<Menu> {
                                   Row(
                                     children: buildMenuList(),
                                   ),
-                                if (widget.menuBuilder != null) widget.menuBuilder(),
+                                if (widget.menuBuilder != null)
+                                  widget.menuBuilder(),
                                 if (widget.trailing != null)
-                                  Expanded(child: Align(alignment: Alignment.centerRight, child: widget.trailing)),
+                                  Expanded(
+                                      child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child: widget.trailing)),
                               ],
                             )),
                       ),
@@ -190,7 +199,10 @@ class MenuState extends State<Menu> {
                     left: (116 * _activeIndex).toDouble(),
                     top: 30,
                     child: SizedBox(
-                        height: (30 * widget.menuList[_activeIndex].menuListItems.length).toDouble(),
+                        height: (30 *
+                                widget.menuList[_activeIndex].menuListItems
+                                    .length)
+                            .toDouble(),
                         width: widget.menuList[_activeIndex].width,
                         child: Container(
                           color: Colors.blueGrey[700],
@@ -244,7 +256,9 @@ class MenuState extends State<Menu> {
   List<Widget> buildItemList() {
     List<Widget> buildItemList = [];
 
-    for (int i = 0; i < widget.menuList[_activeIndex].menuListItems.length; i++) {
+    for (int i = 0;
+        i < widget.menuList[_activeIndex].menuListItems.length;
+        i++) {
       var listItem = widget.menuList[_activeIndex].menuListItems[i];
 
       if (listItem is MenuListItem) {
@@ -263,11 +277,15 @@ class MenuState extends State<Menu> {
                   if (listItem.icon != null)
                     Align(
                         alignment: Alignment.centerLeft,
-                        child: SizedBox(width: 20, child: Icon(listItem.icon, size: 12, color: Colors.white))),
+                        child: SizedBox(
+                            width: 20,
+                            child: Icon(listItem.icon,
+                                size: 12, color: Colors.white))),
                   if (listItem.icon == null) SizedBox(width: 20),
                   Padding(
                     padding: const EdgeInsets.only(left: 6.0),
-                    child: Text(listItem.title, style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    child: Text(listItem.title,
+                        style: TextStyle(color: Colors.white70, fontSize: 12)),
                   ),
                   if (listItem.shortcut != null)
                     Expanded(
@@ -320,7 +338,9 @@ class MenuState extends State<Menu> {
             child: SizedBox(
                 width: 100,
                 child: Center(
-                    child: Text(widget.menuList[i].title, style: TextStyle(color: Colors.white70, fontSize: 12)))),
+                    child: Text(widget.menuList[i].title,
+                        style:
+                            TextStyle(color: Colors.white70, fontSize: 12)))),
           ),
         ));
     }

@@ -49,7 +49,8 @@ class _ScreenState extends State<Screen> {
                 onPressed: () {
                   _showMessage('File.open');
                 },
-                shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
+                shortcut:
+                    MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
               ),
               MenuListItem(title: 'Close'),
               MenuListItem(title: 'Save'),
@@ -98,7 +99,9 @@ class _ScreenState extends State<Screen> {
                     height: 300,
                     child: Container(
                       color: Colors.amber,
-                      child: Center(child: Text(_message, style: TextStyle(fontSize: 40))),
+                      child: Center(
+                          child:
+                              Text(_message, style: TextStyle(fontSize: 40))),
                     ),
                   ),
                   Row(
