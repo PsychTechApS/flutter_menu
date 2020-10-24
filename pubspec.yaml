@@ -1,0 +1,19 @@
+name: flutter_menu
+description: Top menu and context menu for web and desktop
+version: 0.0.1
+homepage: https://github.com/PsychTechApS/context_menu
+maintainer: PsychTech
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.17.0 <2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
