@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// MenuList
 class MenuItem {
   final double width;
   final double height;
@@ -23,8 +24,10 @@ class MenuItem {
 
 abstract class MenuListItemType {}
 
+/// Use to have a dividerline in your menulist
 class MenuListDivider extends MenuListItemType {}
 
+/// Menu Items for your menuList
 class MenuListItem extends MenuListItemType {
   final String title;
   final IconData icon;
@@ -45,6 +48,8 @@ class MenuListItem extends MenuListItemType {
   }
 }
 
+/// Setup a keyboard shortcut for MenuItems, notice that shift should only be used in combination with other system keys and take care
+/// that the browser takes presidence over the app for keyboard shortcuts so choose with care
 class MenuShortcut {
   final LogicalKeyboardKey key;
   final bool shift;

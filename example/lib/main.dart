@@ -15,18 +15,26 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ExampleApp(),
+      home: Screen(),
     );
   }
 }
 
-class ExampleApp extends StatefulWidget {
+class Screen extends StatefulWidget {
   @override
-  _ExampleAppState createState() => _ExampleAppState();
+  _ScreenState createState() => _ScreenState();
 }
 
-class _ExampleAppState extends State<ExampleApp> {
+class _ScreenState extends State<Screen> {
   TextEditingController controller = TextEditingController();
+  String _message = "Choose a MenuItem";
+
+  void _showMessage(String newMessage) {
+    setState(() {
+      _message = newMessage;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,9 +47,9 @@ class _ExampleAppState extends State<ExampleApp> {
                 icon: Icons.open_in_new,
                 title: 'Open',
                 onPressed: () {
-                  print('Open');
+                  _showMessage('File.open');
                 },
-                shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, shift: true),
+                shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
               ),
               MenuListItem(title: 'Close'),
               MenuListItem(title: 'Save'),
@@ -49,7 +57,7 @@ class _ExampleAppState extends State<ExampleApp> {
                 title: 'Delete',
                 shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, alt: true),
                 onPressed: () {
-                  print('Delete');
+                  _showMessage('File.delete');
                 },
               ),
             ]),
@@ -74,16 +82,25 @@ class _ExampleAppState extends State<ExampleApp> {
             builder: (BuildContext context) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                // crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                      width: 400,
-                      height: 30,
-                      child: TextField(
-                        decoration: InputDecoration(
-                            // border: InputBorder.,
-                            hintText: 'Try me...'),
-                      )),
+                    width: 400,
+                    height: 30,
+                    child: TextField(
+                      decoration: InputDecoration(
+                          // border: InputBorder.,
+                          hintText: 'Try me...'),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: Container(
+                      color: Colors.amber,
+                      child: Center(child: Text(_message, style: TextStyle(fontSize: 40))),
+                    ),
+                  ),
                   Row(
                     children: [
                       RaisedButton(
@@ -113,9 +130,7 @@ class _ExampleAppState extends State<ExampleApp> {
                 ],
               );
             },
-          )
-          //  NewWidget(),
-          ),
+          )),
     );
   }
 }

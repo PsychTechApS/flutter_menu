@@ -10,6 +10,7 @@ extension BuildContextMenuFinder on BuildContext {
 
 typedef MenuBuilderCallback = Widget Function();
 
+/// Menu shows an menu and enables keyboard shortcuts to MenuItems
 class Menu extends StatefulWidget {
   final Builder builder;
   final MenuBuilderCallback menuBuilder;
@@ -96,8 +97,6 @@ class MenuState extends State<Menu> {
   void _handleKeyEvent(RawKeyEvent event) {
     // only check on key down and only tjek if real key is involved
     if (event.runtimeType == RawKeyDownEvent && event.logicalKey.keyLabel != '') {
-      print('checking');
-      print('logical key ${event.logicalKey}');
       widget.menuList.forEach((menuList) {
         menuList.menuListItems.forEach((listItem) {
           if (listItem is MenuListItem) {
@@ -106,7 +105,6 @@ class MenuState extends State<Menu> {
                 event.isAltPressed == listItem.shortcut.alt &&
                 event.isShiftPressed == listItem.shortcut.shift &&
                 event.logicalKey == listItem.shortcut.key) {
-              print(listItem.shortcut);
               if (_showShortcutOverlay) {
                 Timer(Duration(seconds: 2), () {
                   // remove the label after 2 seconds
@@ -180,7 +178,13 @@ class MenuState extends State<Menu> {
                     if (widget.builder != null) Expanded(child: widget.builder),
                   ],
                 ),
-
+                Listener(
+                  behavior: HitTestBehavior.translucent,
+                  onPointerDown: (event) {
+                    if (event.buttons == 2) {} // højre klik
+                    closeMenu();
+                  },
+                ),
                 if (_menuIsShown && _menuIsOpen)
                   Positioned(
                     left: (116 * _activeIndex).toDouble(),
@@ -196,15 +200,6 @@ class MenuState extends State<Menu> {
                           ),
                         )),
                   ),
-                Listener(
-                  behavior: HitTestBehavior.translucent,
-                  onPointerDown: (event) {
-                    if (event.buttons == 2) {
-                      print('Højre tast i hele vinduet');
-                    } // højre klik
-                    closeMenu();
-                  },
-                ),
 
                 // ValueListenableBuilder(
                 //   valueListenable: widget.controller,
@@ -248,7 +243,6 @@ class MenuState extends State<Menu> {
 
   List<Widget> buildItemList() {
     List<Widget> buildItemList = [];
-    int _nextIndex = 0;
 
     for (int i = 0; i < widget.menuList[_activeIndex].menuListItems.length; i++) {
       var listItem = widget.menuList[_activeIndex].menuListItems[i];
@@ -258,7 +252,7 @@ class MenuState extends State<Menu> {
           buildItemList.add(
             FlatButton(
               hoverColor: Colors.black26,
-              onPressed: listItem.isActive && listItem.onPressed != null
+              onPressed: listItem.onPressed != null
                   ? () {
                       closeMenu();
                       listItem.onPressed();
@@ -291,7 +285,6 @@ class MenuState extends State<Menu> {
               ),
             ),
           );
-          _nextIndex++;
         }
       }
       if (listItem is MenuListDivider) {
@@ -321,7 +314,6 @@ class MenuState extends State<Menu> {
           child: FlatButton(
             hoverColor: Colors.black38,
             onPressed: () {
-              print('We got a hit at $i');
               _activeIndex = i;
               openMenu(); // Calls setState
             },
