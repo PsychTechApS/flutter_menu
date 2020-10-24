@@ -12,6 +12,7 @@ The package gives you a desktop like experience on web. It gives you the followi
 [ ] Extra topbar to be used as toolbar or information bar
 [ ] Fullscreen dialogs
  
+ This is a beta release and breaking changes will come soon!
 
 ## How to install
 
