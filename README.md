@@ -4,13 +4,13 @@ This packages is developed for web but should work in flutter desktop as well (i
 
 The package gives you a desktop like experience on web. It gives you the following:
 
-[x] Menu with list items (with icon, title and keyboard shortcuts)
-[x] Keyboard shortcuts for menu items
-[ ] Context menu (right click) for screen and widgets
-[ ] Master, detail views (Left pane, right pane)
-[ ] More panes (drawer, 4th pane)
-[ ] Extra topbar to be used as toolbar or information bar
-[ ] Fullscreen dialogs
+- [x] Menu with list items (with icon, title and keyboard shortcuts)
+- [x] Keyboard shortcuts for menu items
+- [ ] Context menu (right click) for screen and widgets
+- [ ] Master, detail views (Left pane, right pane)
+- [ ] More panes (drawer, 4th pane)
+- [ ] Extra topbar to be used as toolbar or information bar
+- [ ] Fullscreen dialogs
  
  This is a beta release and breaking changes will come soon!
 
@@ -32,9 +32,9 @@ Nothing has to be changed.
 
 ### Keyboard shortcuts
 
-#### Shortcut Overlay
+### Keyboard Shortcut Overlay
 
-Overlay feature is disabled by default, but can be enabled programmably (se section).
+Overlay feature is disabled by default, but can be enabled programmably (se How-to-use section).
 
 ## How to use
 
