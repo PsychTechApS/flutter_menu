@@ -76,9 +76,6 @@ class _ScreenState extends State<Screen> {
               MenuListItem(title: 'Goodbye'),
             ]),
           ],
-          menuBuilder: () {
-            return Text('Nr 1');
-          },
           builder: Builder(
             builder: (BuildContext context) {
               return Column(

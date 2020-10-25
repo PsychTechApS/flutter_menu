@@ -14,6 +14,10 @@ The package gives you a desktop like experience on web. It gives you the followi
  
  This is a beta release and breaking changes will come soon!
 
+![Example](screenshots/example.gif)
+
+
+
 ## How to install
 
 ### On web:

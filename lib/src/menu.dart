@@ -13,7 +13,6 @@ typedef MenuBuilderCallback = Widget Function();
 /// Menu shows an menu and enables keyboard shortcuts to MenuItems
 class Menu extends StatefulWidget {
   final Builder builder;
-  final MenuBuilderCallback menuBuilder;
   final List<MenuItem> menuList;
   final Widget leading;
   final Widget trailing;
@@ -21,11 +20,11 @@ class Menu extends StatefulWidget {
   const Menu({
     Key key,
     @required this.builder,
-    @required this.menuBuilder,
     this.menuList,
     this.leading,
     this.trailing,
-  })  : assert(menuBuilder != null, "menuBuilder is missing!"),
+  }) :
+        // assert(menuBuilder != null, "menuBuilder is missing!"),
         super(key: key);
 
   static MenuState of(BuildContext context) {
@@ -174,8 +173,6 @@ class MenuState extends State<Menu> {
                                   Row(
                                     children: buildMenuList(),
                                   ),
-                                if (widget.menuBuilder != null)
-                                  widget.menuBuilder(),
                                 if (widget.trailing != null)
                                   Expanded(
                                       child: Align(
