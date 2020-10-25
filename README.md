@@ -8,6 +8,7 @@ The package gives you a desktop like experience on web. It gives you the followi
 - [x] Keyboard shortcuts for menu items
 - [ ] Context menu (right click) for screen and widgets
 - [ ] Master, detail views (Left pane, right pane)
+- [ ] Flexible pane sized for user to change in ui
 - [ ] More panes (drawer, 4th pane)
 - [ ] Extra topbar to be used as toolbar or information bar
 - [ ] Fullscreen dialogs
@@ -22,10 +23,12 @@ The package gives you a desktop like experience on web. It gives you the followi
 
 ### On web:
 
-The Flutter App has to have control over the right click (contextmenu) a
+The Flutter App has to have control over the right click (contextmenu).
 To take control you have to include the following in your index.html file in the web folder:
 
+```
 <body oncontextmenu="return false;"></body>
+```
 
 ### On desktop:
 
