@@ -38,7 +38,7 @@ class _ScreenState extends State<Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Menu(
+      body: AppScreen(
         // leading: Text('Leading'),
         trailing: Text('Trailing'),
         menuList: [
@@ -112,7 +112,7 @@ class _ScreenState extends State<Screen> {
                 children: [
                   RaisedButton(
                     onPressed: () {
-                      context.menu.closeMenu();
+                      context.appScreen.closeMenu();
                     },
                     child: Text('Close Menu'),
                   ),
@@ -124,13 +124,13 @@ class _ScreenState extends State<Screen> {
                 children: [
                   RaisedButton(
                     onPressed: () {
-                      context.menu.hideMenu();
+                      context.appScreen.hideMenu();
                     },
                     child: Text('Hide Menu'),
                   ),
                   RaisedButton(
                     onPressed: () {
-                      context.menu.showMenu();
+                      context.appScreen.showMenu();
                     },
                     child: Text('Show Menu'),
                   ),
@@ -144,7 +144,7 @@ class _ScreenState extends State<Screen> {
                   height: 50,
                   child: Center(
                     child: Text(
-                        'Pane height: ${context.menu.paneHeight()} width: ${context.menu.detailPaneWidth()}',
+                        'Pane height: ${context.appScreen.paneHeight().toStringAsFixed(1)} width: ${context.appScreen.detailPaneWidth().toStringAsFixed(1)}',
                         style: TextStyle(fontSize: 20)),
                   ),
                 ),

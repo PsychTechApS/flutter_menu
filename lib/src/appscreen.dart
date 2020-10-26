@@ -8,13 +8,13 @@ import 'menu_model.dart';
 
 /// extension for quick access to menu actions and informations
 extension BuildContextMenuFinder on BuildContext {
-  MenuState get menu => Menu.of(this);
+  AppScreenState get appScreen => AppScreen.of(this);
 }
 
 typedef MenuBuilderCallback = Widget Function();
 
 /// Menu shows an menu, enables keyboard shortcuts to MenuItems and give master/detail panes
-class Menu extends StatefulWidget {
+class AppScreen extends StatefulWidget {
   final List<MenuItem> menuList;
   final Builder masterPane;
 
@@ -28,7 +28,7 @@ class Menu extends StatefulWidget {
   final Widget leading;
   final Widget trailing;
 
-  const Menu({
+  const AppScreen({
     Key key,
     this.menuList,
     this.masterPane,
@@ -45,17 +45,19 @@ class Menu extends StatefulWidget {
         assert(detailMinWidth < detailMaxWidth, "Min width > max width!"),
         super(key: key);
 
-  static MenuState of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<MenuInherited>().data;
+  static AppScreenState of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<AppScreenInherited>()
+        .data;
   }
 
   @override
   State<StatefulWidget> createState() {
-    return MenuState();
+    return AppScreenState();
   }
 }
 
-class MenuState extends State<Menu> {
+class AppScreenState extends State<AppScreen> {
   bool _menuIsOpen = false;
   bool _menuIsShown = true;
   bool _showShortcutOverlay = true;
@@ -131,7 +133,10 @@ class MenuState extends State<Menu> {
     setState(() {});
   }
 
+  double kDetailBreakpoint = 700; // TODO: make changeable through parameter
   bool _detailIsShown = true;
+  bool _desktop = true;
+  bool _mobileShowDetail = false;
 
   /// Get current status of detailPane
   /// TODO: implement
@@ -199,78 +204,141 @@ class MenuState extends State<Menu> {
 
   @override
   Widget build(BuildContext context) {
-    return MenuInherited(
+    return AppScreenInherited(
       data: this,
       child: LayoutBuilder(
         builder: (context, constraints) {
           // widget.controller.hideContextMenu();
           _calcPaneHeight(constraints.maxHeight);
-          // if (constraints.maxWidth != currentWidth)
+          if (constraints.maxWidth >= kDetailBreakpoint)
+            _desktop = true;
+          else
+            _desktop = false;
+
           return RawKeyboardListener(
             focusNode: _focusNode,
             onKey: _handleKeyEvent,
             autofocus: true,
-            child: Stack(
-              children: [
-                Column(
-                  // mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (_menuIsShown) menuBar(),
-                    Row(
-                      children: [
-                        masterPane(),
-                        if (widget.detailPane != null)
-                          Row(
-                            children: [
-                              resizeBar(constraints),
-                              detailPane(),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-                Listener(
-                  behavior: HitTestBehavior.translucent,
-                  onPointerDown: (event) {
-                    if (event.buttons == 2) {} // højre klik
-                    closeMenu();
-                  },
-                ),
-                if (_menuIsShown && _menuIsOpen) showMenuOpen(),
-
-                // ValueListenableBuilder(
-                //   valueListenable: widget.controller,
-                //   builder: (context, value, child) {
-                //     if (value.contextShow && value.contextMenu != null)
-                //       return Positioned(
-                //         left: value.contextOffset.dx,
-                //         top: value.contextOffset.dy,
-                //         child: Listener(
-                //           behavior: HitTestBehavior.opaque,
-                //           onPointerSignal: (event) {
-                //             print('${event.toString()}');
-                //           },
-                //           onPointerDown: (event) {
-                //             // if (event.buttons == 2) // højre klik
-                //             // {
-                //             //   widget.controller.hideContextMenu();
-                //             // }
-                //           },
-                //           child: value.contextMenu,
-                //         ),
-                //       );
-                //     return Container();
-                //   },
-                // ),
-                if (_showShortcutOverlay && shortcutLabel != null)
-                  shortcutOverlay(),
-              ],
-            ),
+            child:
+                _desktop ? desktopView(constraints) : mobileView(constraints),
           );
         },
       ),
+    );
+  }
+
+  Stack desktopView(BoxConstraints constraints) {
+    return Stack(
+      children: [
+        Column(
+          // mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_menuIsShown) menuBar(),
+            Row(
+              children: [
+                masterPane(),
+                if (widget.detailPane != null)
+                  Row(
+                    children: [
+                      resizeBar(constraints),
+                      detailPane(),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ),
+        Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (event) {
+            if (event.buttons == 2) {} // højre klik
+            closeMenu();
+          },
+        ),
+        if (_menuIsShown && _menuIsOpen) showMenuOpen(),
+
+        // ValueListenableBuilder(
+        //   valueListenable: widget.controller,
+        //   builder: (context, value, child) {
+        //     if (value.contextShow && value.contextMenu != null)
+        //       return Positioned(
+        //         left: value.contextOffset.dx,
+        //         top: value.contextOffset.dy,
+        //         child: Listener(
+        //           behavior: HitTestBehavior.opaque,
+        //           onPointerSignal: (event) {
+        //             print('${event.toString()}');
+        //           },
+        //           onPointerDown: (event) {
+        //             // if (event.buttons == 2) // højre klik
+        //             // {
+        //             //   widget.controller.hideContextMenu();
+        //             // }
+        //           },
+        //           child: value.contextMenu,
+        //         ),
+        //       );
+        //     return Container();
+        //   },
+        // ),
+        if (_showShortcutOverlay && shortcutLabel != null) shortcutOverlay(),
+      ],
+    );
+  }
+
+  Stack mobileView(BoxConstraints constraints) {
+    return Stack(
+      children: [
+        Column(
+          // mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_menuIsShown) menuBar(),
+            Row(
+              children: [
+                if (!_mobileShowDetail) masterPane(),
+                if (_mobileShowDetail && widget.detailPane != null)
+                  detailPane(),
+              ],
+            ),
+          ],
+        ),
+        Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (event) {
+            if (event.buttons == 2) {} // højre klik
+            closeMenu();
+          },
+        ),
+        if (_menuIsShown && _menuIsOpen) showMenuOpen(),
+
+        // ValueListenableBuilder(
+        //   valueListenable: widget.controller,
+        //   builder: (context, value, child) {
+        //     if (value.contextShow && value.contextMenu != null)
+        //       return Positioned(
+        //         left: value.contextOffset.dx,
+        //         top: value.contextOffset.dy,
+        //         child: Listener(
+        //           behavior: HitTestBehavior.opaque,
+        //           onPointerSignal: (event) {
+        //             print('${event.toString()}');
+        //           },
+        //           onPointerDown: (event) {
+        //             // if (event.buttons == 2) // højre klik
+        //             // {
+        //             //   widget.controller.hideContextMenu();
+        //             // }
+        //           },
+        //           child: value.contextMenu,
+        //         ),
+        //       );
+        //     return Container();
+        //   },
+        // ),
+        if (_showShortcutOverlay && shortcutLabel != null) shortcutOverlay(),
+      ],
     );
   }
 
@@ -500,10 +568,10 @@ class MenuState extends State<Menu> {
   }
 }
 
-class MenuInherited extends InheritedWidget {
-  final MenuState data;
+class AppScreenInherited extends InheritedWidget {
+  final AppScreenState data;
 
-  MenuInherited({
+  AppScreenInherited({
     Key key,
     @required Widget child,
     @required this.data,
