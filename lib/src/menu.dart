@@ -1,30 +1,48 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+
 import 'menu_model.dart';
 
+/// extension for quick access to menu actions and informations
 extension BuildContextMenuFinder on BuildContext {
   MenuState get menu => Menu.of(this);
 }
 
 typedef MenuBuilderCallback = Widget Function();
 
-/// Menu shows an menu and enables keyboard shortcuts to MenuItems
+/// Menu shows an menu, enables keyboard shortcuts to MenuItems and give master/detail panes
 class Menu extends StatefulWidget {
-  final Builder builder;
   final List<MenuItem> menuList;
+  final Builder masterPane;
+
+  final Builder detailPane;
+  final double detailMinWidth;
+  final double detailMaxWidth;
+  final double detailWidth;
+  final bool detailFixedWidth;
+
+  final Builder drawerPane;
   final Widget leading;
   final Widget trailing;
 
   const Menu({
     Key key,
-    @required this.builder,
     this.menuList,
+    this.masterPane,
+    this.detailPane,
+    this.detailMinWidth = 500,
+    this.detailMaxWidth = 300,
+    this.detailWidth = 400,
+    this.detailFixedWidth = false,
+    this.drawerPane,
     this.leading,
     this.trailing,
-  }) :
-        // assert(menuBuilder != null, "menuBuilder is missing!"),
+  })  : assert(menuList != null, "menuList is missing!"),
+        assert(masterPane != null, "masterPane is missing!"),
+        assert(detailMinWidth < detailMaxWidth, "Min width > max width!"),
         super(key: key);
 
   static MenuState of(BuildContext context) {
@@ -39,19 +57,21 @@ class Menu extends StatefulWidget {
 
 class MenuState extends State<Menu> {
   bool _menuIsOpen = false;
-  bool _isActive = true;
   bool _menuIsShown = true;
   bool _showShortcutOverlay = true;
 
+  /// True = Menu is Shown
   bool get isShown => _menuIsShown;
+
+  /// True = MenuList is open (the active MenuItem has it MenuList shown)
   bool get isOpen => _menuIsOpen;
-  bool get isActive => _isActive;
 
   void showShortcutOverlay() => _showShortcutOverlay = true;
   void hideShortcutOverlay() => _showShortcutOverlay = false;
 
   int _activeIndex = 0;
 
+  /// Menu will be hidden from screen
   void hideMenu() {
     if (_menuIsShown) {
       setState(() {
@@ -60,6 +80,7 @@ class MenuState extends State<Menu> {
     }
   }
 
+  /// Menu will be on screen
   void showMenu() {
     if (!_menuIsShown) {
       setState(() {
@@ -68,6 +89,7 @@ class MenuState extends State<Menu> {
     }
   }
 
+  /// Active MenuItem will get is menulist shown
   void openMenu() {
     if (!_menuIsOpen) {
       setState(() {
@@ -76,12 +98,54 @@ class MenuState extends State<Menu> {
     }
   }
 
+  /// MenuList will be closed
   void closeMenu() {
     if (_menuIsOpen) {
       setState(() {
         _menuIsOpen = false;
       });
     }
+  }
+
+  final double kMenuHeight = 30;
+
+  double _paneHeight;
+  double _detailPaneWidth;
+  double detailPaneWidth() => _detailPaneWidth;
+  double paneHeight() => _paneHeight;
+
+  void _calcPaneHeight(double screenHeight) {
+    if (_menuIsShown)
+      _paneHeight = screenHeight - kMenuHeight;
+    else
+      _paneHeight = screenHeight;
+  }
+
+  void setDetailPaneWidth({@required double width}) {
+    if (width < widget.detailMinWidth)
+      _detailPaneWidth = widget.detailMinWidth;
+    else if (width > widget.detailMaxWidth)
+      _detailPaneWidth = widget.detailMaxWidth;
+    else
+      _detailPaneWidth = width;
+    setState(() {});
+  }
+
+  bool _detailIsShown = true;
+
+  /// Get current status of detailPane
+  /// TODO: implement
+  bool detailIsShown() => _detailIsShown;
+
+  /// Master pane is shown.
+  void showOnlyMaster() {
+    // TODO: programmaly choose pane
+  }
+
+  /// Detail pane is shown. showBackButton (=true) gives backbutton in menu.
+  /// If you have your own back functionality use showOnlyMaster() to get back to Master pane.
+  void showOnlyDetail({bool showBackButton}) {
+    // TODO: programmaly choose pane
   }
 
   final FocusNode _focusNode = FocusNode();
@@ -128,13 +192,19 @@ class MenuState extends State<Menu> {
   }
 
   @override
+  void initState() {
+    _detailPaneWidth = widget.detailWidth;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MenuInherited(
       data: this,
       child: LayoutBuilder(
         builder: (context, constraints) {
           // widget.controller.hideContextMenu();
-
+          _calcPaneHeight(constraints.maxHeight);
           // if (constraints.maxWidth != currentWidth)
           return RawKeyboardListener(
             focusNode: _focusNode,
@@ -146,42 +216,19 @@ class MenuState extends State<Menu> {
                   // mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (_menuIsShown)
-                      SizedBox(
-                        height: 30,
-                        width: double.infinity,
-                        child: Container(
-                            color: Colors.blueGrey,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (widget.leading != null)
-                                  Row(
-                                    children: [
-                                      widget.leading,
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 4, right: 4),
-                                        child: SizedBox(
-                                            width: 2,
-                                            child: Container(
-                                                color: Colors.blueGrey[100])),
-                                      ),
-                                    ],
-                                  ),
-                                if (widget.menuList != null)
-                                  Row(
-                                    children: buildMenuList(),
-                                  ),
-                                if (widget.trailing != null)
-                                  Expanded(
-                                      child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: widget.trailing)),
-                              ],
-                            )),
-                      ),
-                    if (widget.builder != null) Expanded(child: widget.builder),
+                    if (_menuIsShown) menuBar(),
+                    Row(
+                      children: [
+                        masterPane(),
+                        if (widget.detailPane != null)
+                          Row(
+                            children: [
+                              resizeBar(constraints),
+                              detailPane(),
+                            ],
+                          ),
+                      ],
+                    ),
                   ],
                 ),
                 Listener(
@@ -191,24 +238,7 @@ class MenuState extends State<Menu> {
                     closeMenu();
                   },
                 ),
-                if (_menuIsShown && _menuIsOpen)
-                  Positioned(
-                    left: (116 * _activeIndex).toDouble(),
-                    top: 30,
-                    child: SizedBox(
-                        height: (30 *
-                                widget.menuList[_activeIndex].menuListItems
-                                    .length)
-                            .toDouble(),
-                        width: widget.menuList[_activeIndex].width,
-                        child: Container(
-                          color: Colors.blueGrey[700],
-                          child: ListView(
-                            itemExtent: 30,
-                            children: buildItemList(),
-                          ),
-                        )),
-                  ),
+                if (_menuIsShown && _menuIsOpen) showMenuOpen(),
 
                 // ValueListenableBuilder(
                 //   valueListenable: widget.controller,
@@ -235,17 +265,113 @@ class MenuState extends State<Menu> {
                 //   },
                 // ),
                 if (_showShortcutOverlay && shortcutLabel != null)
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Text(
-                      shortcutLabel,
-                      style: TextStyle(color: Colors.blue, fontSize: 50),
-                    ),
-                  ),
+                  shortcutOverlay(),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  SizedBox menuBar() {
+    return SizedBox(
+      height: 30,
+      width: double.infinity,
+      child: Container(
+          color: Colors.blueGrey,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (widget.leading != null)
+                Row(
+                  children: [
+                    widget.leading,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, right: 4),
+                      child: SizedBox(
+                          width: 2,
+                          child: Container(color: Colors.blueGrey[100])),
+                    ),
+                  ],
+                ),
+              if (widget.menuList != null)
+                Row(
+                  children: buildMenuList(),
+                ),
+              if (widget.trailing != null)
+                Expanded(
+                    child: Align(
+                        alignment: Alignment.centerRight,
+                        child: widget.trailing)),
+            ],
+          )),
+    );
+  }
+
+  Positioned showMenuOpen() {
+    return Positioned(
+      left: (116 * _activeIndex).toDouble(),
+      top: 30,
+      child: SizedBox(
+          height: (30 * widget.menuList[_activeIndex].menuListItems.length)
+              .toDouble(),
+          width: widget.menuList[_activeIndex].width,
+          child: Container(
+            color: Colors.blueGrey[700],
+            child: ListView(
+              itemExtent: 30,
+              children: buildItemList(),
+            ),
+          )),
+    );
+  }
+
+  Align shortcutOverlay() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Text(
+        shortcutLabel,
+        style: TextStyle(color: Colors.blue, fontSize: 50),
+      ),
+    );
+  }
+
+  Expanded masterPane() {
+    return Expanded(
+        child: SizedBox(height: _paneHeight, child: widget.masterPane));
+  }
+
+  SizedBox detailPane() {
+    return SizedBox(
+      width: detailPaneWidth(),
+      height: _paneHeight,
+      child: widget.detailPane,
+    );
+  }
+
+  MouseRegion resizeBar(BoxConstraints constraints) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.resizeColumn,
+      child: GestureDetector(
+        onPanUpdate: (details) {
+          setDetailPaneWidth(
+              width: constraints.maxWidth - details.globalPosition.dx);
+        },
+        child: SizedBox(
+          width: 5,
+          height: _paneHeight,
+          child: Container(
+            // color: Colors.amber,
+            decoration: BoxDecoration(
+              // color: Colors.teal,
+              gradient: LinearGradient(
+                  colors: [Colors.teal, Colors.teal[200]],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight),
+            ),
+          ),
+        ),
       ),
     );
   }

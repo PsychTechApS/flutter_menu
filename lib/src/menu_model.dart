@@ -56,6 +56,7 @@ class MenuShortcut {
   final bool shift;
   final bool alt;
   final bool ctrl;
+
   MenuShortcut({
     this.key,
     this.shift = false,
@@ -68,3 +69,13 @@ class MenuShortcut {
     return 'MenuShortcut(logicalKey: $key, shift: $shift, alt: $alt, ctrl: $ctrl)';
   }
 }
+
+// /// DetailPane info:
+// class DetailPane {
+//   final double defaultWidth;
+//   final double minWidth;
+//   final double maxWidth;
+//   final bool fixedWidth;
+
+//   Pane(this.defaultWidth, this.minWidth, this.maxWidth);
+// }
