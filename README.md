@@ -2,6 +2,8 @@
 
 This packages is developed for web but should work in flutter desktop as well (is tested on Flutter Windows). 
 
+Try it out: http://www.flutter.psychtech.mitspace.dk/
+
 The package gives you a desktop like experience on web. It gives you the following:
 
 - [x] Menu with list items (with icon, title and keyboard shortcuts)
@@ -19,7 +21,7 @@ All siblings down the widget tree has access to the AppScreen functionality.
  
 This is a beta release and breaking changes will come soon!
 
-Try it out: http://www.flutter.psychtech.mitspace.dk/
+
 
 
 ![Example](screenshots/example4.gif)
