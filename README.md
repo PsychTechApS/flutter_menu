@@ -9,8 +9,9 @@ The package gives you a desktop like experience on web. It gives you the followi
 - [x] Menu with list items (with icon, title and keyboard shortcuts)
 - [x] Keyboard shortcuts for menu items
 - [x] Master, detail views (Left pane, right pane)
-- [ ] Flexible pane sized for user to change in ui
 - [ ] Context menu (right click) for screen and widgets
+- [ ] Flexible pane sizes
+- [ ] Scrollbar
 - [ ] More panes (drawer, maybe a 4th pane)
 - [ ] Extra topbar to be used as toolbar or information bar
 - [ ] Fullscreen dialogs

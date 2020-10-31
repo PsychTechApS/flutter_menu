@@ -26,6 +26,7 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
+  final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
   String _message = "Choose a MenuItem";
 
@@ -39,8 +40,7 @@ class _ScreenState extends State<Screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppScreen(
-        // leading: Text('Leading'),
-        trailing: Text('Trailing'),
+        appContextMenu: appContextMenu(),
         menuList: [
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
@@ -213,14 +213,22 @@ class _ScreenState extends State<Screen> {
                 ),
               ),
               SizedBox(height: 80),
-              SizedBox(
-                width: 300,
-                height: 300,
-                child: Container(
-                  color: Colors.amber,
-                  child: Align(
-                      alignment: Alignment.center,
-                      child: Text(_message, style: TextStyle(fontSize: 40))),
+              ContextMenu(
+                menu: SizedBox(
+                  height: 100,
+                  width: 100,
+                  child:
+                      Container(color: Colors.blueGrey, child: Text('Context')),
+                ),
+                child: SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: Container(
+                    color: Colors.amber,
+                    child: Align(
+                        alignment: Alignment.center,
+                        child: Text(_message, style: TextStyle(fontSize: 40))),
+                  ),
                 ),
               ),
               SizedBox(height: 20),
@@ -245,6 +253,22 @@ class _ScreenState extends State<Screen> {
                   child: Text('Show detail'),
                 ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  Builder appContextMenu() {
+    print('BUILD: appContextMenu');
+    return Builder(
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: 300,
+          width: 400,
+          child: Container(
+            color: Colors.yellow,
+            child: Text('AppContextMenu'),
           ),
         );
       },

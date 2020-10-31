@@ -30,11 +30,14 @@ class AppScreen extends StatefulWidget {
   final Widget leading;
   final Widget trailing;
 
+  final Builder appContextMenu;
+
   const AppScreen({
     Key key,
     this.menuList,
     this.masterPane,
     this.detailPane,
+    this.appContextMenu,
     this.detailMinWidth = 500,
     this.detailMaxWidth = 300,
     this.detailWidth = 400,
@@ -223,6 +226,32 @@ class AppScreenState extends State<AppScreen> {
     }
   }
 
+  bool _showContext = false;
+  Widget _currentContextMenu;
+  double _dxContext;
+  double _dyContext;
+
+  /// Show ContextMenu
+  void showContextMenu({@required Widget menu, @required Offset offset}) {
+    print('A Show contextMenu');
+    print('B Du trykkede højre klik');
+    print('C Position: $offset');
+    _dxContext = offset.dx;
+    _dyContext = offset.dy;
+    _currentContextMenu = menu;
+    setState(() {
+      _showContext = true;
+    });
+  }
+
+  /// Hide ContextMenu
+  void hideContextMenu() {
+    print('Hide contextMenu');
+    setState(() {
+      _showContext = false;
+    });
+  }
+
   final FocusNode _focusNode = FocusNode();
   String shortcutLabel;
 
@@ -269,6 +298,8 @@ class AppScreenState extends State<AppScreen> {
   @override
   void initState() {
     _detailPaneWidth = widget.detailWidth;
+    if (widget.appContextMenu != null)
+      _currentContextMenu = widget.appContextMenu;
     super.initState();
   }
 
@@ -278,7 +309,7 @@ class AppScreenState extends State<AppScreen> {
       data: this,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // widget.controller.hideContextMenu();
+          // _showContext = false; // when rebuild occurs remove context menu
           _calcScreenAndPaneSized(constraints);
           _handleBreakpoint(constraints);
 
@@ -320,36 +351,36 @@ class AppScreenState extends State<AppScreen> {
         Listener(
           behavior: HitTestBehavior.translucent,
           onPointerDown: (event) {
-            if (event.buttons == 2) {} // højre klik
+            if (event.buttons == 2) {
+              // right click
+              if (widget.appContextMenu != null) {
+                showContextMenu(
+                    menu: widget.appContextMenu, offset: event.position);
+              } else
+                hideContextMenu();
+            } else
+              hideContextMenu(); // højre klik
             closeMenu();
           },
         ),
         if (_menuIsShown && _menuIsOpen) showMenuOpen(),
-
-        // ValueListenableBuilder(
-        //   valueListenable: widget.controller,
-        //   builder: (context, value, child) {
-        //     if (value.contextShow && value.contextMenu != null)
-        //       return Positioned(
-        //         left: value.contextOffset.dx,
-        //         top: value.contextOffset.dy,
-        //         child: Listener(
-        //           behavior: HitTestBehavior.opaque,
-        //           onPointerSignal: (event) {
-        //             print('${event.toString()}');
-        //           },
-        //           onPointerDown: (event) {
-        //             // if (event.buttons == 2) // højre klik
-        //             // {
-        //             //   widget.controller.hideContextMenu();
-        //             // }
-        //           },
-        //           child: value.contextMenu,
-        //         ),
-        //       );
-        //     return Container();
-        //   },
-        // ),
+        if (_showContext && _currentContextMenu != null)
+          Positioned(
+            left: _dxContext,
+            top: _dyContext,
+            child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerSignal: (event) {
+                  print('${event.toString()}');
+                },
+                onPointerDown: (event) {
+                  if (event.buttons == 2) // højre klik
+                  {
+                    hideContextMenu();
+                  }
+                },
+                child: _currentContextMenu),
+          ),
         if (_showShortcutOverlay && shortcutLabel != null) shortcutOverlay(),
       ],
     );
