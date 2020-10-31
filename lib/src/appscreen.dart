@@ -69,10 +69,10 @@ class AppScreenState extends State<AppScreen> {
   bool _showShortcutOverlay = true;
 
   /// True = Menu is Shown
-  bool get isShown => _menuIsShown;
+  bool get isMenuShown => _menuIsShown;
 
   /// True = MenuList is open (the active MenuItem has it MenuList shown)
-  bool get isOpen => _menuIsOpen;
+  bool get isMenuOpen => _menuIsOpen;
 
   void showShortcutOverlay() => _showShortcutOverlay = true;
   void hideShortcutOverlay() => _showShortcutOverlay = false;
