@@ -23,6 +23,8 @@ class AppScreen extends StatefulWidget {
   final double detailMaxWidth;
   final double detailWidth;
   final bool detailFixedWidth;
+  final double desktopBreakpoint;
+  final Function onBreakpointChange;
 
   final Builder drawerPane;
   final Widget leading;
@@ -37,6 +39,10 @@ class AppScreen extends StatefulWidget {
     this.detailMaxWidth = 300,
     this.detailWidth = 400,
     this.detailFixedWidth = false,
+    this.desktopBreakpoint = 800,
+
+    /// Use this to update ui when desktop vs compact change happens
+    this.onBreakpointChange,
     this.drawerPane,
     this.leading,
     this.trailing,
@@ -123,6 +129,25 @@ class AppScreenState extends State<AppScreen> {
       _paneHeight = screenHeight;
   }
 
+  void _handleBreakpoint(BoxConstraints constraints) {
+    if (constraints.maxWidth >= widget.desktopBreakpoint) {
+      if (!_isDesktop) {
+        _isDesktop = true;
+        if (widget.onBreakpointChange != null) _onBreakPointChange();
+      }
+    } else if (_isDesktop) {
+      _isDesktop = false;
+      if (widget.onBreakpointChange != null) _onBreakPointChange();
+    }
+  }
+
+  Future _onBreakPointChange() async {
+    // Move to next tick to prevent call under build
+    Future.delayed(Duration.zero, () async {
+      widget.onBreakpointChange();
+    });
+  }
+
   void setDetailPaneWidth({@required double width}) {
     if (width < widget.detailMinWidth)
       _detailPaneWidth = widget.detailMinWidth;
@@ -133,24 +158,51 @@ class AppScreenState extends State<AppScreen> {
     setState(() {});
   }
 
-  double kDetailBreakpoint = 700; // TODO: make changeable through parameter
-  bool _detailIsShown = true;
-  bool _desktop = true;
-  bool _mobileShowDetail = false;
+  bool _isDesktop = true;
+  bool _compactShowDetail = false;
 
   /// Get current status of detailPane
   /// TODO: implement
-  bool detailIsShown() => _detailIsShown;
+  bool detailIsShown() {
+    if (_isDesktop) {
+      // We are on desktop view
+      return true;
+    }
+    // we are in compact mode
+    if (_compactShowDetail) return true;
+    return false;
+  }
+
+  /// Returns current view (true == desktop view)
+  bool isDesktop() => _isDesktop;
+
+  /// Returns current view (true == compact view)
+
+  bool isCompact() => !_isDesktop;
 
   /// Master pane is shown.
   void showOnlyMaster() {
     // TODO: programmaly choose pane
+    if (!_isDesktop) {
+      if (_compactShowDetail) {
+        setState(() {
+          _compactShowDetail = false;
+        });
+      }
+    }
   }
 
   /// Detail pane is shown. showBackButton (=true) gives backbutton in menu.
   /// If you have your own back functionality use showOnlyMaster() to get back to Master pane.
   void showOnlyDetail({bool showBackButton}) {
-    // TODO: programmaly choose pane
+    // TODO: backbutton to show
+    if (!_isDesktop) {
+      if (!_compactShowDetail) {
+        setState(() {
+          _compactShowDetail = true;
+        });
+      }
+    }
   }
 
   final FocusNode _focusNode = FocusNode();
@@ -210,17 +262,15 @@ class AppScreenState extends State<AppScreen> {
         builder: (context, constraints) {
           // widget.controller.hideContextMenu();
           _calcPaneHeight(constraints.maxHeight);
-          if (constraints.maxWidth >= kDetailBreakpoint)
-            _desktop = true;
-          else
-            _desktop = false;
+          _handleBreakpoint(constraints);
 
           return RawKeyboardListener(
             focusNode: _focusNode,
             onKey: _handleKeyEvent,
             autofocus: true,
-            child:
-                _desktop ? desktopView(constraints) : mobileView(constraints),
+            child: _isDesktop
+                ? desktopView(constraints)
+                : compactView(constraints),
           );
         },
       ),
@@ -287,7 +337,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  Stack mobileView(BoxConstraints constraints) {
+  Stack compactView(BoxConstraints constraints) {
     return Stack(
       children: [
         Column(
@@ -297,9 +347,12 @@ class AppScreenState extends State<AppScreen> {
             if (_menuIsShown) menuBar(),
             Row(
               children: [
-                if (!_mobileShowDetail) masterPane(),
-                if (_mobileShowDetail && widget.detailPane != null)
-                  detailPane(),
+                if (!_compactShowDetail) masterPane(),
+                if (_compactShowDetail && widget.detailPane != null)
+                  SizedBox(
+                      height: _paneHeight,
+                      width: constraints.maxWidth,
+                      child: detailPane()),
               ],
             ),
           ],

@@ -51,8 +51,18 @@ class _ScreenState extends State<Screen> {
               },
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyO, ctrl: true),
             ),
-            MenuListItem(title: 'Close'),
-            MenuListItem(title: 'Save'),
+            MenuListItem(
+              title: 'Close',
+              onPressed: () {
+                _showMessage('File.close');
+              },
+            ),
+            MenuListItem(
+              title: 'Save',
+              onPressed: () {
+                _showMessage('File.save');
+              },
+            ),
             MenuListItem(
               title: 'Delete',
               shortcut: MenuShortcut(key: LogicalKeyboardKey.keyD, alt: true),
@@ -80,11 +90,17 @@ class _ScreenState extends State<Screen> {
         detailWidth: 600,
         detailMinWidth: 400,
         detailMaxWidth: 800,
+        onBreakpointChange: () {
+          setState(() {
+            print('Breakpoint change');
+          });
+        },
       ),
     );
   }
 
   Builder detailPane() {
+    print('BUILD: detailPane');
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -149,6 +165,14 @@ class _ScreenState extends State<Screen> {
                   ),
                 ),
               ),
+              SizedBox(height: 20),
+              if (context.appScreen.isCompact())
+                RaisedButton(
+                  onPressed: () {
+                    context.appScreen.showOnlyMaster();
+                  },
+                  child: Text('Show master'),
+                ),
             ],
           ),
         );
@@ -157,6 +181,7 @@ class _ScreenState extends State<Screen> {
   }
 
   Builder masterPane() {
+    print('BUILD: masterPane');
     return Builder(
       builder: (BuildContext context) {
         return Container(
@@ -199,6 +224,13 @@ class _ScreenState extends State<Screen> {
                 ),
               ),
               SizedBox(height: 20),
+              if (context.appScreen.isCompact())
+                RaisedButton(
+                  onPressed: () {
+                    context.appScreen.showOnlyDetail();
+                  },
+                  child: Text('Show detail'),
+                ),
             ],
           ),
         );
