@@ -23,6 +23,7 @@ class MenuItem {
       'MenuItem(title: $title, isActive: $isActive, menuItemList: $menuListItems)';
 }
 
+/// Abstract class
 abstract class MenuListItemType {}
 
 /// Use to have a dividerline in your menulist

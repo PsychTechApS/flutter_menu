@@ -53,7 +53,7 @@ class AppScreen extends StatefulWidget {
 
   static AppScreenState of(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<AppScreenInherited>()
+        .dependOnInheritedWidgetOfExactType<_AppScreenInherited>()
         .data;
   }
 
@@ -74,7 +74,10 @@ class AppScreenState extends State<AppScreen> {
   /// True = MenuList is open (the active MenuItem has it MenuList shown)
   bool get isMenuOpen => _menuIsOpen;
 
+  /// Turn on shortcut overlay (activated shortcut is shown on screen)
   void showShortcutOverlay() => _showShortcutOverlay = true;
+
+  /// Turn off shortcut overlay (activated shortcut is shown on screen)
   void hideShortcutOverlay() => _showShortcutOverlay = false;
 
   int _activeIndex = 0;
@@ -118,15 +121,33 @@ class AppScreenState extends State<AppScreen> {
   final double kMenuHeight = 30;
 
   double _paneHeight;
+  double _screenHeight;
+  double _screenWidth;
   double _detailPaneWidth;
-  double detailPaneWidth() => _detailPaneWidth;
-  double paneHeight() => _paneHeight;
 
-  void _calcPaneHeight(double screenHeight) {
+  /// returns the current width of the Detail Pane
+  double getDetailPaneWidth() => _detailPaneWidth;
+
+  /// returns the current height of the Panes (changes if menu is shown or not)
+  double getPaneHeight() => _paneHeight;
+
+  /// returns the current height of the AppScreen
+  double getScreenHeight() => _screenHeight;
+
+  /// returns the current width of the AppScreen
+  double getScreenWidth() => _screenWidth;
+
+  void _calcScreenAndPaneSized(BoxConstraints constraints) {
+    // set the pane height
     if (_menuIsShown)
-      _paneHeight = screenHeight - kMenuHeight;
+      _paneHeight = constraints.maxHeight - kMenuHeight;
     else
-      _paneHeight = screenHeight;
+      _paneHeight = constraints.maxHeight;
+    //
+    _screenHeight = constraints.maxHeight;
+    _screenWidth = constraints.maxWidth;
+    // TODO: set Master width
+    // TODO: Set Detail width here
   }
 
   void _handleBreakpoint(BoxConstraints constraints) {
@@ -162,7 +183,6 @@ class AppScreenState extends State<AppScreen> {
   bool _compactShowDetail = false;
 
   /// Get current status of detailPane
-  /// TODO: implement
   bool detailIsShown() {
     if (_isDesktop) {
       // We are on desktop view
@@ -182,7 +202,6 @@ class AppScreenState extends State<AppScreen> {
 
   /// Master pane is shown.
   void showOnlyMaster() {
-    // TODO: programmaly choose pane
     if (!_isDesktop) {
       if (_compactShowDetail) {
         setState(() {
@@ -195,7 +214,6 @@ class AppScreenState extends State<AppScreen> {
   /// Detail pane is shown. showBackButton (=true) gives backbutton in menu.
   /// If you have your own back functionality use showOnlyMaster() to get back to Master pane.
   void showOnlyDetail({bool showBackButton}) {
-    // TODO: backbutton to show
     if (!_isDesktop) {
       if (!_compactShowDetail) {
         setState(() {
@@ -234,7 +252,7 @@ class AppScreenState extends State<AppScreen> {
                   });
                 });
                 setState(() {
-                  shortcutLabel = shortcutText(listItem.shortcut);
+                  shortcutLabel = _shortcutText(listItem.shortcut);
                 });
               }
               if (listItem.onPressed != null) {
@@ -256,12 +274,12 @@ class AppScreenState extends State<AppScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScreenInherited(
+    return _AppScreenInherited(
       data: this,
       child: LayoutBuilder(
         builder: (context, constraints) {
           // widget.controller.hideContextMenu();
-          _calcPaneHeight(constraints.maxHeight);
+          _calcScreenAndPaneSized(constraints);
           _handleBreakpoint(constraints);
 
           return RawKeyboardListener(
@@ -465,7 +483,7 @@ class AppScreenState extends State<AppScreen> {
 
   SizedBox detailPane() {
     return SizedBox(
-      width: detailPaneWidth(),
+      width: getDetailPaneWidth(),
       height: _paneHeight,
       child: widget.detailPane,
     );
@@ -537,7 +555,7 @@ class AppScreenState extends State<AppScreen> {
                       // Align(
                       // alignment: Alignment.centerRight,
                       child: Text(
-                        shortcutText(listItem.shortcut),
+                        _shortcutText(listItem.shortcut),
                         textAlign: TextAlign.end,
                         style: TextStyle(color: Colors.white70, fontSize: 8),
                       ),
@@ -621,10 +639,10 @@ class AppScreenState extends State<AppScreen> {
   }
 }
 
-class AppScreenInherited extends InheritedWidget {
+class _AppScreenInherited extends InheritedWidget {
   final AppScreenState data;
 
-  AppScreenInherited({
+  _AppScreenInherited({
     Key key,
     @required Widget child,
     @required this.data,
@@ -636,14 +654,14 @@ class AppScreenInherited extends InheritedWidget {
   }
 }
 
-const String labelCtrl = 'Ctrl+';
-const String labelAlt = ' Alt+';
-const String labelShift = 'Shift+';
+const String _labelCtrl = 'Ctrl+';
+const String _labelAlt = ' Alt+';
+const String _labelShift = 'Shift+';
 
-String shortcutText(MenuShortcut shortcut) {
+String _shortcutText(MenuShortcut shortcut) {
   // String text = '';
-  return (shortcut.ctrl ? labelCtrl : '') +
-      (shortcut.alt ? labelAlt : '') +
-      (shortcut.shift ? labelShift : '') +
+  return (shortcut.ctrl ? _labelCtrl : '') +
+      (shortcut.alt ? _labelAlt : '') +
+      (shortcut.shift ? _labelShift : '') +
       shortcut.key.keyLabel;
 }

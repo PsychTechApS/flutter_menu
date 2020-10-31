@@ -160,7 +160,7 @@ class _ScreenState extends State<Screen> {
                   height: 50,
                   child: Center(
                     child: Text(
-                        'Pane height: ${context.appScreen.paneHeight().toStringAsFixed(1)} width: ${context.appScreen.detailPaneWidth().toStringAsFixed(1)}',
+                        'Pane height: ${context.appScreen.getPaneHeight().toStringAsFixed(1)} width: ${context.appScreen.getDetailPaneWidth().toStringAsFixed(1)}',
                         style: TextStyle(fontSize: 20)),
                   ),
                 ),
@@ -221,6 +221,19 @@ class _ScreenState extends State<Screen> {
                   child: Align(
                       alignment: Alignment.center,
                       child: Text(_message, style: TextStyle(fontSize: 40))),
+                ),
+              ),
+              SizedBox(height: 20),
+              Card(
+                elevation: 12,
+                child: Container(
+                  width: 400,
+                  height: 50,
+                  child: Center(
+                    child: Text(
+                        'Screen height: ${context.appScreen.getScreenHeight().toStringAsFixed(1)} width: ${context.appScreen.getScreenWidth().toStringAsFixed(1)}',
+                        style: TextStyle(fontSize: 20)),
+                  ),
                 ),
               ),
               SizedBox(height: 20),

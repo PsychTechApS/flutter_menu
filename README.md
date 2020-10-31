@@ -21,7 +21,7 @@ All siblings down the widget tree has access to the AppScreen functionality.
  
 This is a beta release and breaking changes will come soon!
 
-
+Get support and share knowledge of flutter web on: https://discord.gg/pmXCFZUxxC
 
 
 ![Example](screenshots/example4.gif)
@@ -49,7 +49,7 @@ You can access all variables and functions through the buildContext, and for you
 
 the AppScreen has to be in a parent BuildContext (and not the current context). This is why panes has to be a Builder function and not just a Widget. To prevent you from making misconceptional errors.
 
-### Menus
+## Menus
 
 The menu can have several menuItems and each menuItem has its own menuListItems.
 
@@ -74,7 +74,7 @@ You have access to current variables:
 *context.appScreen.isMenuOpen()* - returns true if a MenuItem is shown on Screen
 
 
-### Keyboard shortcuts
+## Keyboard shortcuts
 
 It is possible to activate functions with keyboard shortcuts which is good for productibility.
 
@@ -86,14 +86,14 @@ You can then choose which system keys has to be hold down as well: ctrl, alt, sh
 Please notice that shift should only be used in combination with other system keys and notice that the browser takes presidence over the app for keyboard shortcuts - so choose with care.
 
 
-### Keyboard Shortcut Overlay
+## Keyboard Shortcut Overlay
 
 Overlay feature is disabled by default, but can be enabled programmably (se How-to-use section). This can be helpfull under development and as a feature making example videos.
 
 context.appScreen.showShortcutOverlay()  - 2 sec. text overlay will be shown
 context.appScreen.hideShortcutOverlay()  - No overlay will be shown
 
-### Master/ detail panes
+## Master/ detail panes
 
 You always have to set the Master pane. If no detail pane is supplied only Master is shown.
 If you set both Master and detail panes default behavior will be give the user control of a moveable vertical line in the UI to change the size of the detail pane.
@@ -114,6 +114,12 @@ You have access to current variables:
 
 *context.appScreen.isDesktop()* - returns true if Desktop and false if compact
 *context.appScreen.detailIsShown()* - returns true if detail is shown
+
+*context.appScreen.getScreenHeight()* - returns the current height of the AppScreen
+*context.appScreen.getScreenWidth()* - returns the current width of the AppScreen
+*context.appScreen.getScreenHeight()* - returns the current height of the AppScreen
+*context.appScreen.getPaneHeight()* - returns the current height of the Panes (changes if menu is shown or not)
+*context.appScreen.getDetailPaneWidth()* - returns the current width of the Detail Pane
 
 In compact mode you can change master/detail view:
 
