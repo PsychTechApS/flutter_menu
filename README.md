@@ -22,7 +22,8 @@ This is a beta release and breaking changes will come soon!
 Try it out: http://www.flutter.psychtech.mitspace.dk/
 
 
-<img src="screenshots/example2.gif" alt="example2" width="700"/>
+![Example](screenshots/example4.gif)
+
 
 ## How to install
 

@@ -1,3 +1,7 @@
+## [0.0.4] - 2020-10-31
+
+- Example gif updated
+
 ## [0.0.3] - 2020-10-31
 
 - News: responsive master/detail pane included with lots of features
