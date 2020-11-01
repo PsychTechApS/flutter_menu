@@ -9,10 +9,12 @@ The package gives you a desktop like experience on web. It gives you the followi
 - [x] Menu with list items (with icon, title and keyboard shortcuts)
 - [x] Keyboard shortcuts for menu items
 - [x] Master, detail views (Left pane, right pane)
-- [ ] Context menu (right click) for screen and widgets
-- [ ] Flexible pane sizes
+- [X] Context menu (right click) for Master, Detail and widgets
+- [ ] More predefined contextmenus to choose from
+- [ ] Flexible pane sizes as well as 
 - [ ] Scrollbar
 - [ ] More panes (drawer, maybe a 4th pane)
+- [ ] More callbacks on change
 - [ ] Extra topbar to be used as toolbar or information bar
 - [ ] Fullscreen dialogs
 - [ ] different menu in compact mode
@@ -23,7 +25,7 @@ All siblings down the widget tree has access to the AppScreen functionality.
 This is a beta release and breaking changes will come soon!
 
 Get support and share knowledge of flutter web on: https://discord.gg/pmXCFZUxxC
-
+We welcome suggestions and bug reports
 
 ![Example](screenshots/example4.gif)
 

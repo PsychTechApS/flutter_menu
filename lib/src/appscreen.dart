@@ -30,14 +30,16 @@ class AppScreen extends StatefulWidget {
   final Widget leading;
   final Widget trailing;
 
-  final Builder appContextMenu;
+  final Builder masterContextMenu;
+  final Builder detailContextMenu;
 
   const AppScreen({
     Key key,
     this.menuList,
     this.masterPane,
     this.detailPane,
-    this.appContextMenu,
+    this.masterContextMenu,
+    this.detailContextMenu,
     this.detailMinWidth = 500,
     this.detailMaxWidth = 300,
     this.detailWidth = 400,
@@ -233,15 +235,46 @@ class AppScreenState extends State<AppScreen> {
 
   /// Show ContextMenu
   void showContextMenu({@required Widget menu, @required Offset offset}) {
+    if (menu != null) {
+      print('CONTEXT MENU: $offset');
+      _dxContext = offset.dx;
+      _dyContext = offset.dy;
+      _currentContextMenu = menu;
+      setState(() {
+        _showContext = true;
+      });
+    } else
+      setState(() {
+        _showContext = false;
+      });
+  }
+
+  /// Show ContextMenu for MasterPane or DetailPane
+  void _showMasterOrDetailPaneContextMenu({@required Offset offset}) {
+    /// TODO: @mastersize
     print('A Show contextMenu');
-    print('B Du trykkede højre klik');
+
     print('C Position: $offset');
-    _dxContext = offset.dx;
-    _dyContext = offset.dy;
-    _currentContextMenu = menu;
-    setState(() {
-      _showContext = true;
-    });
+
+    if (_isDesktop) {
+      // desktop mode
+      if (offset.dx > _screenWidth - _detailPaneWidth) {
+        print('DETAIL CONTEXT desktop');
+        showContextMenu(menu: widget.detailContextMenu, offset: offset);
+      } else {
+        print('MASTER CONTEXT desktop');
+        showContextMenu(menu: widget.masterContextMenu, offset: offset);
+      }
+    } else {
+      // Compact mode
+      if (_compactShowDetail) {
+        print('DETAIL CONTEXT compact');
+        showContextMenu(menu: widget.detailContextMenu, offset: offset);
+      } else {
+        print('MASTER CONTEXT compact');
+        showContextMenu(menu: widget.masterContextMenu, offset: offset);
+      }
+    }
   }
 
   /// Hide ContextMenu
@@ -298,8 +331,8 @@ class AppScreenState extends State<AppScreen> {
   @override
   void initState() {
     _detailPaneWidth = widget.detailWidth;
-    if (widget.appContextMenu != null)
-      _currentContextMenu = widget.appContextMenu;
+    if (widget.masterContextMenu != null)
+      _currentContextMenu = widget.masterContextMenu;
     super.initState();
   }
 
@@ -319,7 +352,7 @@ class AppScreenState extends State<AppScreen> {
             autofocus: true,
             child: _isDesktop
                 ? desktopView(constraints)
-                : compactView(constraints),
+                : _compactView(constraints),
           );
         },
       ),
@@ -333,118 +366,90 @@ class AppScreenState extends State<AppScreen> {
           // mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_menuIsShown) menuBar(),
+            if (_menuIsShown) _menuBar(),
             Row(
               children: [
-                masterPane(),
+                _masterPane(),
                 if (widget.detailPane != null)
                   Row(
                     children: [
-                      resizeBar(constraints),
-                      detailPane(),
+                      _resizeBar(constraints),
+                      _detailPane(),
                     ],
                   ),
               ],
             ),
           ],
         ),
-        Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerDown: (event) {
-            if (event.buttons == 2) {
-              // right click
-              if (widget.appContextMenu != null) {
-                showContextMenu(
-                    menu: widget.appContextMenu, offset: event.position);
-              } else
-                hideContextMenu();
-            } else
-              hideContextMenu(); // højre klik
-            closeMenu();
-          },
-        ),
-        if (_menuIsShown && _menuIsOpen) showMenuOpen(),
-        if (_showContext && _currentContextMenu != null)
-          Positioned(
-            left: _dxContext,
-            top: _dyContext,
-            child: Listener(
-                behavior: HitTestBehavior.opaque,
-                onPointerSignal: (event) {
-                  print('${event.toString()}');
-                },
-                onPointerDown: (event) {
-                  if (event.buttons == 2) // højre klik
-                  {
-                    hideContextMenu();
-                  }
-                },
-                child: _currentContextMenu),
-          ),
-        if (_showShortcutOverlay && shortcutLabel != null) shortcutOverlay(),
+        _listenForRightClick(),
+        if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
+        if (_showContext && _currentContextMenu != null) _showContextMenu(),
+        if (_showShortcutOverlay && shortcutLabel != null) _shortcutOverlay(),
       ],
     );
   }
 
-  Stack compactView(BoxConstraints constraints) {
+  Listener _listenForRightClick() {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (event) {
+        if (event.buttons == 2) {
+          _showMasterOrDetailPaneContextMenu(offset: event.position);
+        } else
+          hideContextMenu();
+        closeMenu();
+      },
+    );
+  }
+
+  Positioned _showContextMenu() {
+    return Positioned(
+      left: _dxContext,
+      top: _dyContext,
+      child: Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerSignal: (event) {
+            print('${event.toString()}');
+          },
+          onPointerDown: (event) {
+            if (event.buttons == 2) // højre klik
+            {
+              hideContextMenu();
+            }
+          },
+          child: _currentContextMenu),
+    );
+  }
+
+  Stack _compactView(BoxConstraints constraints) {
     return Stack(
       children: [
         Column(
           // mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_menuIsShown) menuBar(),
+            if (_menuIsShown) _menuBar(),
             Row(
               children: [
-                if (!_compactShowDetail) masterPane(),
+                if (!_compactShowDetail) _masterPane(),
                 if (_compactShowDetail && widget.detailPane != null)
                   SizedBox(
                       height: _paneHeight,
                       width: constraints.maxWidth,
-                      child: detailPane()),
+                      child: _detailPane()),
               ],
             ),
           ],
         ),
-        Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerDown: (event) {
-            if (event.buttons == 2) {} // højre klik
-            closeMenu();
-          },
-        ),
-        if (_menuIsShown && _menuIsOpen) showMenuOpen(),
-
-        // ValueListenableBuilder(
-        //   valueListenable: widget.controller,
-        //   builder: (context, value, child) {
-        //     if (value.contextShow && value.contextMenu != null)
-        //       return Positioned(
-        //         left: value.contextOffset.dx,
-        //         top: value.contextOffset.dy,
-        //         child: Listener(
-        //           behavior: HitTestBehavior.opaque,
-        //           onPointerSignal: (event) {
-        //             print('${event.toString()}');
-        //           },
-        //           onPointerDown: (event) {
-        //             // if (event.buttons == 2) // højre klik
-        //             // {
-        //             //   widget.controller.hideContextMenu();
-        //             // }
-        //           },
-        //           child: value.contextMenu,
-        //         ),
-        //       );
-        //     return Container();
-        //   },
-        // ),
-        if (_showShortcutOverlay && shortcutLabel != null) shortcutOverlay(),
+        _listenForRightClick(),
+        if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
+        if (_showContext && _currentContextMenu != null) _showContextMenu(),
+        if (_showShortcutOverlay && shortcutLabel != null) _shortcutOverlay(),
       ],
     );
   }
 
-  SizedBox menuBar() {
+  SizedBox _menuBar() {
     return SizedBox(
       height: 30,
       width: double.infinity,
@@ -467,7 +472,7 @@ class AppScreenState extends State<AppScreen> {
                 ),
               if (widget.menuList != null)
                 Row(
-                  children: buildMenuList(),
+                  children: _buildMenuList(),
                 ),
               if (widget.trailing != null)
                 Expanded(
@@ -479,7 +484,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  Positioned showMenuOpen() {
+  Positioned _showMenuOpen() {
     return Positioned(
       left: (116 * _activeIndex).toDouble(),
       top: 30,
@@ -491,13 +496,13 @@ class AppScreenState extends State<AppScreen> {
             color: Colors.blueGrey[700],
             child: ListView(
               itemExtent: 30,
-              children: buildItemList(),
+              children: _buildItemList(),
             ),
           )),
     );
   }
 
-  Align shortcutOverlay() {
+  Align _shortcutOverlay() {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Text(
@@ -507,12 +512,12 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  Expanded masterPane() {
+  Expanded _masterPane() {
     return Expanded(
         child: SizedBox(height: _paneHeight, child: widget.masterPane));
   }
 
-  SizedBox detailPane() {
+  SizedBox _detailPane() {
     return SizedBox(
       width: getDetailPaneWidth(),
       height: _paneHeight,
@@ -520,7 +525,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  MouseRegion resizeBar(BoxConstraints constraints) {
+  MouseRegion _resizeBar(BoxConstraints constraints) {
     return MouseRegion(
       cursor: SystemMouseCursors.resizeColumn,
       child: GestureDetector(
@@ -546,7 +551,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  List<Widget> buildItemList() {
+  List<Widget> _buildItemList() {
     List<Widget> buildItemList = [];
 
     for (int i = 0;
@@ -611,7 +616,7 @@ class AppScreenState extends State<AppScreen> {
     return buildItemList;
   }
 
-  List<Widget> buildMenuList() {
+  List<Widget> _buildMenuList() {
     List<Widget> buildList = [];
     // int index = 0;
     for (int i = 0; i < widget.menuList.length; i++) {

@@ -40,7 +40,7 @@ class _ScreenState extends State<Screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppScreen(
-        appContextMenu: appContextMenu(),
+        masterContextMenu: appContextMenu(),
         menuList: [
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
