@@ -6,6 +6,8 @@ Try it out: http://www.flutter.psychtech.mitspace.dk/
 
 The package gives you a desktop like experience on web. It gives you the following:
 
+![Example](screenshots/example4.gif)
+
 - [x] Menu with list items (with icon, title and keyboard shortcuts)
 - [x] Keyboard shortcuts for menu items
 - [x] Master, detail views (Left pane, right pane)
@@ -25,10 +27,6 @@ All siblings down the widget tree has access to the AppScreen functionality.
 This is a beta release and breaking changes will come soon!
 
 Get support and share knowledge of flutter web on: https://discord.gg/pmXCFZUxxC
-We welcome suggestions and bug reports
-
-![Example](screenshots/example4.gif)
-
 
 ## How to install
 

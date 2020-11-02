@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'appscreen.dart';
 
+abstract class ContextMenuType extends StatelessWidget {}
+
+abstract class ContextMenuItemType extends StatelessWidget {}
+
 class ContextMenu extends StatelessWidget {
   final Widget child;
-  final Widget menu;
+  final ContextMenuType menu;
 
   const ContextMenu({Key key, @required this.menu, this.child})
       : super(key: key);

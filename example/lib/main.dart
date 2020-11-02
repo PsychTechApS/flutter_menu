@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
 
+const Map kColorMap = {
+  'Red': Colors.red,
+  'Blue': Colors.blue,
+  'Purple': Colors.purple,
+  'Black': Colors.black,
+  'Pink': Colors.pink
+};
+
 void main() {
   runApp(MyApp());
 }
@@ -30,9 +38,17 @@ class _ScreenState extends State<Screen> {
   TextEditingController controller = TextEditingController();
   String _message = "Choose a MenuItem";
 
+  Color masterBackgroundColor = Colors.white;
+
   void _showMessage(String newMessage) {
     setState(() {
       _message = newMessage;
+    });
+  }
+
+  void _masterSetBackgroundColor(String color) {
+    setState(() {
+      masterBackgroundColor = kColorMap[color];
     });
   }
 
@@ -40,7 +56,18 @@ class _ScreenState extends State<Screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppScreen(
-        masterContextMenu: appContextMenu(),
+        masterContextMenu: ContextMenuSliver(
+          title: 'Master',
+          children: [
+            myContextMenuItem(color: 'Red'),
+            myContextMenuItem(color: 'Blue'),
+            myContextMenuItem(color: 'Purple'),
+            myContextMenuItem(color: 'Pink'),
+          ],
+        ),
+        detailContextMenu: ContextMenuSliver(
+          title: 'Detail',
+        ),
         menuList: [
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
@@ -185,7 +212,7 @@ class _ScreenState extends State<Screen> {
     return Builder(
       builder: (BuildContext context) {
         return Container(
-          color: Colors.blueAccent,
+          color: masterBackgroundColor,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -214,11 +241,8 @@ class _ScreenState extends State<Screen> {
               ),
               SizedBox(height: 80),
               ContextMenu(
-                menu: SizedBox(
-                  height: 100,
-                  width: 100,
-                  child:
-                      Container(color: Colors.blueGrey, child: Text('Context')),
+                menu: ContextMenuSliver(
+                  title: 'Widget',
                 ),
                 child: SizedBox(
                   width: 300,
@@ -272,6 +296,18 @@ class _ScreenState extends State<Screen> {
           ),
         );
       },
+    );
+  }
+
+  Widget myContextMenuItem({String color}) {
+    return ContextMenuItem(
+      onTap: () {
+        _masterSetBackgroundColor(color);
+      },
+      child: Container(
+        color: kColorMap[color],
+        child: Text(color),
+      ),
     );
   }
 }

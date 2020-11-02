@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_menu/flutter_menu.dart';
 
 import 'menu_model.dart';
 
@@ -30,8 +31,8 @@ class AppScreen extends StatefulWidget {
   final Widget leading;
   final Widget trailing;
 
-  final Builder masterContextMenu;
-  final Builder detailContextMenu;
+  final ContextMenuType masterContextMenu;
+  final ContextMenuType detailContextMenu;
 
   const AppScreen({
     Key key,
