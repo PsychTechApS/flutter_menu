@@ -1,6 +1,6 @@
 ## [0.1.1] - 2020-11-04
 
-- Bug fix: when contextmenu open left click would remove focus.
+- Bug fix: when contextmenu then open left click would remove focus.
 
 ## [0.1.0] - 2020-11-03
 
