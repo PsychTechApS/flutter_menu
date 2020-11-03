@@ -6,7 +6,7 @@ Try it out: http://www.flutter.psychtech.mitspace.dk/
 
 The package gives you a desktop like experience on web. It gives you the following:
 
-![Example](screenshots/example4.gif)
+![Example](screenshots/example5.gif)
 
 - [x] Menu with list items (with icon, title and keyboard shortcuts)
 - [x] Keyboard shortcuts for menu items
