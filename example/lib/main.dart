@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_menu/flutter_menu.dart';
 
+const Map kColorMap = {
+  'Red': Colors.red,
+  'Blue': Colors.blue,
+  'Purple': Colors.purple,
+  'Black': Colors.black,
+  'Pink': Colors.pink,
+  'Yellow': Colors.yellow,
+  'Orange': Colors.orange,
+};
+
 void main() {
   runApp(MyApp());
 }
@@ -26,8 +36,12 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
+  final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
-  String _message = "Choose a MenuItem";
+  String _message = "Choose a MenuItem.";
+
+  Color masterBackgroundColor = Colors.white;
+  Color detailBackgroundColor = Colors.blueGrey[300];
 
   void _showMessage(String newMessage) {
     setState(() {
@@ -35,12 +49,40 @@ class _ScreenState extends State<Screen> {
     });
   }
 
+  void _masterSetBackgroundColor(String color) {
+    setState(() {
+      masterBackgroundColor = kColorMap[color];
+    });
+  }
+
+  void _detailSetBackgroundColor(String color) {
+    setState(() {
+      detailBackgroundColor = kColorMap[color];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppScreen(
-        // leading: Text('Leading'),
-        trailing: Text('Trailing'),
+        masterContextMenu: ContextMenuSliver(
+          title: 'Master',
+          children: [
+            masterContextMenuItem(color: 'Red'),
+            masterContextMenuItem(color: 'Blue'),
+            masterContextMenuItem(color: 'Purple'),
+            masterContextMenuItem(color: 'Pink'),
+          ],
+        ),
+        detailContextMenu: ContextMenuSliver(
+          title: 'Detail',
+          children: [
+            detailContextMenuItem(color: 'Yellow'),
+            detailContextMenuItem(color: 'Orange'),
+            detailContextMenuItem(color: 'Pink'),
+            detailContextMenuItem(color: 'Red'),
+          ],
+        ),
         menuList: [
           MenuItem(title: 'File', menuListItems: [
             MenuListItem(
@@ -104,7 +146,7 @@ class _ScreenState extends State<Screen> {
     return Builder(
       builder: (BuildContext context) {
         return Container(
-          color: Colors.blueGrey[300],
+          color: detailBackgroundColor,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -153,6 +195,17 @@ class _ScreenState extends State<Screen> {
                 ],
               ),
               SizedBox(height: 20),
+              SizedBox(
+                width: 300,
+                height: 300,
+                child: Container(
+                  color: Colors.blueGrey,
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Text(_message, style: TextStyle(fontSize: 40))),
+                ),
+              ),
+              SizedBox(height: 20),
               Card(
                 elevation: 12,
                 child: Container(
@@ -185,7 +238,7 @@ class _ScreenState extends State<Screen> {
     return Builder(
       builder: (BuildContext context) {
         return Container(
-          color: Colors.blueAccent,
+          color: masterBackgroundColor,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -213,14 +266,20 @@ class _ScreenState extends State<Screen> {
                 ),
               ),
               SizedBox(height: 80),
-              SizedBox(
-                width: 300,
-                height: 300,
-                child: Container(
-                  color: Colors.amber,
-                  child: Align(
-                      alignment: Alignment.center,
-                      child: Text(_message, style: TextStyle(fontSize: 40))),
+              ContextMenu(
+                menu: ContextMenuSliver(
+                  title: 'Widget',
+                ),
+                child: SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: Container(
+                    color: Colors.blueGrey,
+                    child: Align(
+                        alignment: Alignment.center,
+                        child: Text('Right click Me',
+                            style: TextStyle(fontSize: 30))),
+                  ),
                 ),
               ),
               SizedBox(height: 20),
@@ -248,6 +307,46 @@ class _ScreenState extends State<Screen> {
           ),
         );
       },
+    );
+  }
+
+  Builder appContextMenu() {
+    print('BUILD: appContextMenu');
+    return Builder(
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: 300,
+          width: 400,
+          child: Container(
+            color: Colors.yellow,
+            child: Text('AppContextMenu'),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget masterContextMenuItem({String color}) {
+    return ContextMenuItem(
+      onTap: () {
+        _masterSetBackgroundColor(color);
+      },
+      child: Container(
+        color: kColorMap[color],
+        child: Center(child: Text(color)),
+      ),
+    );
+  }
+
+  Widget detailContextMenuItem({String color}) {
+    return ContextMenuItem(
+      onTap: () {
+        _detailSetBackgroundColor(color);
+      },
+      child: Container(
+        color: kColorMap[color],
+        child: Center(child: Text(color)),
+      ),
     );
   }
 }
