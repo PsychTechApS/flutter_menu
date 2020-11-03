@@ -26,7 +26,7 @@ All siblings down the widget tree has access to the AppScreen functionality.
  
 This is a beta release and breaking changes will come soon!
 
-Get support and share knowledge of flutter web on: https://discord.gg/pmXCFZUxxC
+Get support, announcements and share knowledge of flutter web on: https://discord.gg/pmXCFZUxxC
 
 ## How to install
 
