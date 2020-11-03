@@ -393,7 +393,7 @@ class AppScreenState extends State<AppScreen> {
             ),
           ],
         ),
-        _listenForRightClick(),
+        _listenForAppClick(),
         if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
         if (_showShortcutOverlay && shortcutLabel != null) _shortcutOverlay(),
@@ -401,7 +401,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  Listener _listenForRightClick() {
+  Listener _listenForAppClick() {
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (event) {
@@ -457,7 +457,7 @@ class AppScreenState extends State<AppScreen> {
             ),
           ],
         ),
-        _listenForRightClick(),
+        _listenForAppClick(),
         if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
         if (_showShortcutOverlay && shortcutLabel != null) _shortcutOverlay(),
