@@ -73,6 +73,8 @@ class AppScreenState extends State<AppScreen> {
   bool _menuIsOpen = false;
   bool _menuIsShown = true;
   bool _showShortcutOverlay = true;
+  double _lastScreenWidth = 0;
+  double _lastScreenHeight = 0;
 
   /// True = Menu is Shown
   bool get isMenuShown => _menuIsShown;
@@ -165,6 +167,15 @@ class AppScreenState extends State<AppScreen> {
     } else if (_isDesktop) {
       _isDesktop = false;
       if (widget.onBreakpointChange != null) _onBreakPointChange();
+    }
+  }
+
+  void _handleConstraintChange(BoxConstraints constraints) {
+    if (constraints.maxHeight != _lastScreenHeight ||
+        constraints.maxWidth != _lastScreenWidth) {
+      _showContext = false;
+      _lastScreenHeight = constraints.maxHeight;
+      _lastScreenWidth = constraints.maxWidth;
     }
   }
 
@@ -343,7 +354,7 @@ class AppScreenState extends State<AppScreen> {
       data: this,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // _showContext = false; // when rebuild occurs remove context menu
+          _handleConstraintChange(constraints);
           _calcScreenAndPaneSized(constraints);
           _handleBreakpoint(constraints);
 
