@@ -307,7 +307,7 @@ class AppScreenState extends State<AppScreen> {
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
-    // only check on key down and only tjek if real key is involved
+    // only check on key down and only tjek if real key is involved to reduce payload
     if (event.runtimeType == RawKeyDownEvent &&
         event.logicalKey.keyLabel != '') {
       widget.menuList.forEach((menuList) {
@@ -406,10 +406,14 @@ class AppScreenState extends State<AppScreen> {
       behavior: HitTestBehavior.translucent,
       onPointerDown: (event) {
         if (event.buttons == 2) {
+          // right click
           _showMasterOrDetailPaneContextMenu(offset: event.position);
-        } else
+        }
+        if (event.buttons == 1) {
+          // left click
           hideContextMenu();
-        closeMenu();
+          closeMenu();
+        }
       },
     );
   }
@@ -654,35 +658,6 @@ class AppScreenState extends State<AppScreen> {
           ),
         ));
     }
-    // widget.menuList.forEach((menuItem) {
-    //   if (menuItem.isActive)
-    //     buildList.add(FlatButton(
-    //       onPressed: () {
-    //         print('We got a hit at $index');
-    //         setState(() {
-    //           _activeIndex = index;
-    //         });
-    //       },
-    //       child: Text(menuItem.title, style: TextStyle(color: Colors.white70, fontSize: 12)),
-    //     )
-    //         // Row(
-    //         //   children: [
-    //         //     Padding(
-    //         //       padding: const EdgeInsets.only(left: 15.0, right: 15),
-    //         //       child: Row(
-    //         //         children: [
-    //         //           Text(menuItem.title, style: TextStyle(color: Colors.white70, fontSize: 12)),
-    //         //         ],
-    //         //       ),
-    //         //     ),
-    //         //     SizedBox(width: 2, child: Container(color: Colors.black26))
-    //         //   ],
-    //         // ),
-    //         );
-    //   index = index + 1;
-    // });
-
-    // print(widget.menuList.toString());
     return buildList;
   }
 }
