@@ -28,23 +28,26 @@ class ContextMenuSliver extends ContextMenuType {
     return SizedBox(
       height: height,
       width: width,
-      child: Container(
-        color: widgetBackgroundColor,
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverAppBar(
-              title: Text(title, style: titleStyle),
-              backgroundColor: titleBackgroundColor,
-              expandedHeight: 60.0,
-              // flexibleSpace: FlexibleSpaceBar(
-              //   background: Image.asset('assets/forest.jpg', fit: BoxFit.cover),
-              // ),
-            ),
-            SliverFixedExtentList(
-              itemExtent: 50.0,
-              delegate: SliverChildListDelegate(List.from(children)),
-            ),
-          ],
+      child: Card(
+        elevation: 5,
+        child: Container(
+          color: widgetBackgroundColor,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                title: Text(title, style: titleStyle),
+                backgroundColor: titleBackgroundColor,
+                expandedHeight: 60.0,
+                // flexibleSpace: FlexibleSpaceBar(
+                //   background: Image.asset('assets/forest.jpg', fit: BoxFit.cover),
+                // ),
+              ),
+              SliverFixedExtentList(
+                itemExtent: 50.0,
+                delegate: SliverChildListDelegate(List.from(children)),
+              ),
+            ],
+          ),
         ),
       ),
     );

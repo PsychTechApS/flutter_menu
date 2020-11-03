@@ -127,4 +127,27 @@ In compact mode you can change master/detail view:
 *context.appScreen.showOnlyMaster()*  change UI to show masterPane()
 *context.appScreen.showOnlyDetail()* change UI to show detailPane() 
 
+## Context menu (right click)
+
+You can set different context menus for Master & Detail pane, and each individual Widget can have its own context menu.
+
+
+You just wrap a widget in a ContextMenu() widget and specify the widget. You can use the prebuild ContextMenuSliver() or build your own. 
+
+The only requirement is that the ContextMenu() is a sibling to AppScreen(). 
+
+```
+ContextMenu(
+    menu: ContextMenuSliver(title: 'Widget)
+    child: SizedBox(height: 200, width: 200),
+)
+```
+
+This will give you a small empty ContextMenu. You can use ContextMenuSliverItem to build your menu.
+
+Please take a look at the example app for more examples.
+
+More prebuild ContextMenus will come. Feel free to build your own and contribute to the project.
+
+
 
