@@ -422,18 +422,29 @@ class AppScreenState extends State<AppScreen> {
     return Positioned(
       left: _dxContext,
       top: _dyContext,
-      child: Listener(
-          behavior: HitTestBehavior.opaque,
-          onPointerSignal: (event) {
-            print('${event.toString()}');
-          },
-          onPointerDown: (event) {
-            if (event.buttons == 2) // højre klik
-            {
-              hideContextMenu();
-            }
-          },
-          child: _currentContextMenu),
+      child: TweenAnimationBuilder(
+        duration: Duration(milliseconds: 200),
+        builder: (BuildContext context, value, Widget child) {
+          return Transform.scale(
+            scale: value,
+            alignment: Alignment.center,
+            child: child,
+          );
+        },
+        tween: Tween(begin: 0.0, end: 1.0),
+        child: Listener(
+            behavior: HitTestBehavior.opaque,
+            onPointerSignal: (event) {
+              print('${event.toString()}');
+            },
+            onPointerDown: (event) {
+              if (event.buttons == 2) // højre klik
+              {
+                hideContextMenu();
+              }
+            },
+            child: _currentContextMenu),
+      ),
     );
   }
 
