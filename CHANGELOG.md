@@ -1,3 +1,7 @@
+## [0.1.2] - 2020-11-07
+
+- Animation added to context menu (default: off in desktop mode and on in compact mode)
+
 ## [0.1.1] - 2020-11-04
 
 - Bug fix: when contextmenu then open left click would remove focus.

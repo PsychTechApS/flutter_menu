@@ -1,6 +1,6 @@
 # flutter_menu
 
-This packages is developed for web but should work in flutter desktop as well (is tested on Flutter Windows). 
+This is a UI kit for developed for web but works for flutter desktop as well (is tested on Flutter Windows). 
 
 Try it out: http://www.flutter.psychtech.mitspace.dk/
 
@@ -12,6 +12,8 @@ The package gives you a desktop like experience on web. It gives you the followi
 - [x] Keyboard shortcuts for menu items
 - [x] Master, detail views (Left pane, right pane)
 - [X] Context menu (right click) for Master, Detail and widgets
+- [X] Longpress for contextmenu (for touch displays). Centered and animated
+- [ ] Choose between touch UI or desktop UI (user can change it)
 - [ ] More predefined contextmenus to choose from
 - [ ] Flexible pane sizes as well as 
 - [ ] Scrollbar
