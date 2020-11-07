@@ -1,6 +1,10 @@
 ## [0.1.2] - 2020-11-07
 
-- Animation added to context menu (default: off in desktop mode and on in compact mode)
+- Animation added to context menu
+- Context menu stay inside boundaries of Master or Detail pane
+- BREAKING: masterContextMenu and detailContextMenu of new type ContextMenu
+- BREAKING: ContextMenu (for custom widget menus) is now ContextMenuContainer.
+- BREAKING: ContextMenus has to specify width and height (new feature: contextmenu stays within pane and new center )
 
 ## [0.1.1] - 2020-11-04
 

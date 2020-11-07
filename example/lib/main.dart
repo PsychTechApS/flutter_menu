@@ -65,23 +65,31 @@ class _ScreenState extends State<Screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppScreen(
-        masterContextMenu: ContextMenuSliver(
-          title: 'Master',
-          children: [
-            masterContextMenuItem(color: 'Red'),
-            masterContextMenuItem(color: 'Blue'),
-            masterContextMenuItem(color: 'Purple'),
-            masterContextMenuItem(color: 'Pink'),
-          ],
+        masterContextMenu: ContextMenu(
+          width: 150,
+          height: 250,
+          child: ContextMenuSliver(
+            title: 'Master',
+            children: [
+              masterContextMenuItem(color: 'Red'),
+              masterContextMenuItem(color: 'Blue'),
+              masterContextMenuItem(color: 'Purple'),
+              masterContextMenuItem(color: 'Pink'),
+            ],
+          ),
         ),
-        detailContextMenu: ContextMenuSliver(
-          title: 'Detail',
-          children: [
-            detailContextMenuItem(color: 'Yellow'),
-            detailContextMenuItem(color: 'Orange'),
-            detailContextMenuItem(color: 'Pink'),
-            detailContextMenuItem(color: 'Red'),
-          ],
+        detailContextMenu: ContextMenu(
+          width: 300,
+          height: 150,
+          child: ContextMenuSliver(
+            title: 'Detail',
+            children: [
+              detailContextMenuItem(color: 'Yellow'),
+              detailContextMenuItem(color: 'Orange'),
+              detailContextMenuItem(color: 'Pink'),
+              detailContextMenuItem(color: 'Red'),
+            ],
+          ),
         ),
         menuList: [
           MenuItem(title: 'File', menuListItems: [
@@ -147,86 +155,89 @@ class _ScreenState extends State<Screen> {
       builder: (BuildContext context) {
         return Container(
           color: detailBackgroundColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 20),
-              Card(
-                elevation: 12,
-                child: Container(
-                  width: 300,
-                  height: 50,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 20),
+                Card(
+                  elevation: 12,
                   child: Container(
-                    color: Colors.amber,
-                    child: Center(
-                        child: Text('DETAIL', style: TextStyle(fontSize: 20))),
+                    width: 300,
+                    height: 50,
+                    child: Container(
+                      color: Colors.amber,
+                      child: Center(
+                          child:
+                              Text('DETAIL', style: TextStyle(fontSize: 20))),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  RaisedButton(
-                    onPressed: () {
-                      context.appScreen.closeMenu();
-                    },
-                    child: Text('Close Menu'),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  RaisedButton(
-                    onPressed: () {
-                      context.appScreen.hideMenu();
-                    },
-                    child: Text('Hide Menu'),
-                  ),
-                  RaisedButton(
-                    onPressed: () {
-                      context.appScreen.showMenu();
-                    },
-                    child: Text('Show Menu'),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                width: 300,
-                height: 300,
-                child: Container(
-                  color: Colors.blueGrey,
-                  child: Align(
-                      alignment: Alignment.center,
-                      child: Text(_message, style: TextStyle(fontSize: 40))),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    RaisedButton(
+                      onPressed: () {
+                        context.appScreen.closeMenu();
+                      },
+                      child: Text('Close Menu'),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: 20),
-              Card(
-                elevation: 12,
-                child: Container(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    RaisedButton(
+                      onPressed: () {
+                        context.appScreen.hideMenu();
+                      },
+                      child: Text('Hide Menu'),
+                    ),
+                    RaisedButton(
+                      onPressed: () {
+                        context.appScreen.showMenu();
+                      },
+                      child: Text('Show Menu'),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                SizedBox(
                   width: 300,
-                  height: 50,
-                  child: Center(
-                    child: Text(
-                        'Pane height: ${context.appScreen.getPaneHeight().toStringAsFixed(1)} width: ${context.appScreen.getDetailPaneWidth().toStringAsFixed(1)}',
-                        style: TextStyle(fontSize: 20)),
+                  height: 300,
+                  child: Container(
+                    color: Colors.blueGrey,
+                    child: Align(
+                        alignment: Alignment.center,
+                        child: Text(_message, style: TextStyle(fontSize: 40))),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              if (context.appScreen.isCompact())
-                RaisedButton(
-                  onPressed: () {
-                    context.appScreen.showOnlyMaster();
-                  },
-                  child: Text('Show master'),
+                SizedBox(height: 20),
+                Card(
+                  elevation: 12,
+                  child: Container(
+                    width: 300,
+                    height: 50,
+                    child: Center(
+                      child: Text(
+                          'Pane height: ${context.appScreen.detailPaneDetails.height.toStringAsFixed(1)} width: ${context.appScreen.detailPaneDetails.width.toStringAsFixed(1)}',
+                          style: TextStyle(fontSize: 20)),
+                    ),
+                  ),
                 ),
-            ],
+                SizedBox(height: 20),
+                if (context.appScreen.isCompact())
+                  RaisedButton(
+                    onPressed: () {
+                      context.appScreen.showOnlyMaster();
+                    },
+                    child: Text('Show master'),
+                  ),
+              ],
+            ),
           ),
         );
       },
@@ -239,71 +250,63 @@ class _ScreenState extends State<Screen> {
       builder: (BuildContext context) {
         return Container(
           color: masterBackgroundColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 20),
-              Card(
-                elevation: 12,
-                child: Container(
-                  width: 300,
-                  height: 50,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 20),
+                Card(
+                  elevation: 12,
                   child: Container(
-                    color: Colors.amber,
-                    child: Center(
-                        child: Text('MASTER', style: TextStyle(fontSize: 20))),
+                    width: 300,
+                    height: 50,
+                    child: Container(
+                      color: Colors.amber,
+                      child: Center(
+                          child:
+                              Text('MASTER', style: TextStyle(fontSize: 20))),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 80),
-              SizedBox(
-                width: 400,
-                height: 30,
-                child: TextField(
-                  decoration: InputDecoration(
-                      // border: InputBorder.,
-                      hintText: 'Try me...'),
-                ),
-              ),
-              SizedBox(height: 80),
-              ContextMenu(
-                menu: ContextMenuSliver(
-                  title: 'Widget',
-                ),
-                child: SizedBox(
-                  width: 300,
-                  height: 300,
-                  child: Container(
-                    color: Colors.blueGrey,
-                    child: Align(
-                        alignment: Alignment.center,
-                        child: Text('Right click Me',
-                            style: TextStyle(fontSize: 30))),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Card(
-                elevation: 12,
-                child: Container(
+                SizedBox(height: 80),
+                SizedBox(
                   width: 400,
-                  height: 50,
-                  child: Center(
-                    child: Text(
-                        'Screen height: ${context.appScreen.getScreenHeight().toStringAsFixed(1)} width: ${context.appScreen.getScreenWidth().toStringAsFixed(1)}',
-                        style: TextStyle(fontSize: 20)),
+                  height: 30,
+                  child: TextField(
+                    decoration: InputDecoration(
+                        // border: InputBorder.,
+                        hintText: 'Try me...'),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              if (context.appScreen.isCompact())
-                RaisedButton(
-                  onPressed: () {
-                    context.appScreen.showOnlyDetail();
-                  },
-                  child: Text('Show detail'),
+                SizedBox(height: 80),
+                ContextMenuContainer(
+                  width: 300,
+                  height: 200,
+                  menu: ContextMenuSliver(
+                    title: 'Widget',
+                  ),
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: Container(
+                      color: Colors.blueGrey,
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text('Right click Me',
+                              style: TextStyle(fontSize: 30))),
+                    ),
+                  ),
                 ),
-            ],
+                SizedBox(height: 20),
+                if (context.appScreen.isCompact())
+                  RaisedButton(
+                    onPressed: () {
+                      context.appScreen.showOnlyDetail();
+                    },
+                    child: Text('Show detail'),
+                  ),
+              ],
+            ),
           ),
         );
       },

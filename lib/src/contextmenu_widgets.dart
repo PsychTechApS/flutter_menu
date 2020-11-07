@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_menu/flutter_menu.dart';
 
-class ContextMenuSliver extends ContextMenuType {
+class ContextMenuSliver extends ContextMenuWidget {
   final String title;
   final double height;
   final double width;

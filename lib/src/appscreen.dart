@@ -34,8 +34,8 @@ class AppScreen extends StatefulWidget {
   final Widget leading;
   final Widget trailing;
 
-  final ContextMenuType masterContextMenu;
-  final ContextMenuType detailContextMenu;
+  final ContextMenu masterContextMenu;
+  final ContextMenu detailContextMenu;
 
   const AppScreen({
     Key key,
@@ -131,74 +131,70 @@ class AppScreenState extends State<AppScreen> {
 
   final double kMenuHeight = 30;
 
-  Detail _masterPaneInfo = Detail();
+  Detail _masterPaneDetails = Detail();
 
   /// info about masterPane
-  get masterPaneInfo => _masterPaneInfo;
+  get masterPaneDetails => _masterPaneDetails;
 
-  Detail _detailPaneInfo = Detail();
+  Detail _detailPaneDetails = Detail();
 
   /// info about detailPane
-  get detailPaneInfo => _detailPaneInfo;
-  double _paneHeight;
-  double _screenHeight;
-  double _screenWidth;
+  get detailPaneDetails => _detailPaneDetails;
+
+  Detail _screenDetails = Detail();
+
+  /// info about detailPane
+  get screenDetails => _screenDetails;
+
   double _detailPaneWidth;
-
-  /// returns the current width of the Detail Pane
-  double getDetailPaneWidth() => _detailPaneWidth;
-
-  /// returns the current height of the Panes (changes if menu is shown or not)
-  double getPaneHeight() => _paneHeight;
-
-  /// returns the current height of the AppScreen
-  double getScreenHeight() => _screenHeight;
-
-  /// returns the current width of the AppScreen
-  double getScreenWidth() => _screenWidth;
 
   bool _drawerIsShown = false; // TODO: implement drawer
   double _drawerWidth = 0; // TODO: implement drawer
   double kResizeBarWidth = 5; // TODO: global or parameter
 
   void _calcScreenAndPaneSize(BoxConstraints constraints) {
+    // Calc screen sized
+    _screenDetails.height = constraints.maxHeight;
+    _screenDetails.width = constraints.maxWidth;
+    _screenDetails.minDx = 0;
+    _screenDetails.maxDx = constraints.maxWidth;
+    _screenDetails.minDy = 0;
+    _screenDetails.minDx = constraints.minWidth;
+
     // calc the pane height info
-    _detailPaneInfo.maxDy = constraints.maxHeight;
-    _masterPaneInfo.maxDy = constraints.maxHeight;
+    _detailPaneDetails.maxDy = constraints.maxHeight;
+    _masterPaneDetails.maxDy = constraints.maxHeight;
 
     // is menu shown it has to be withdrawen from pane height
-    _detailPaneInfo.minDy = _menuIsShown ? kMenuHeight : 0;
-    _masterPaneInfo.minDy = _menuIsShown ? kMenuHeight : 0;
+    _detailPaneDetails.minDy = _menuIsShown ? kMenuHeight : 0;
+    _masterPaneDetails.minDy = _menuIsShown ? kMenuHeight : 0;
 
-    _detailPaneInfo.height = _detailPaneInfo.maxDy - _detailPaneInfo.minDy;
-    _masterPaneInfo.height = _masterPaneInfo.maxDy - _masterPaneInfo.minDy;
-
-    _paneHeight = constraints.maxHeight; // TODO: to be removed
-    // calc the pane width:
+    _detailPaneDetails.height =
+        _detailPaneDetails.maxDy - _detailPaneDetails.minDy;
+    _masterPaneDetails.height =
+        _masterPaneDetails.maxDy - _masterPaneDetails.minDy;
 
     if (_isDesktop) // we have both on screen
     {
       // we have desktop view with master AND detail
       // remember the slider width if shown
-      _masterPaneInfo.minDx = _drawerIsShown ? _drawerWidth : 0;
-      _masterPaneInfo.maxDx =
+      _masterPaneDetails.minDx = _drawerIsShown ? _drawerWidth : 0;
+      _masterPaneDetails.maxDx =
           constraints.maxWidth - _detailPaneWidth - kResizeBarWidth;
-      _detailPaneInfo.minDx = _masterPaneInfo.maxDx + kResizeBarWidth;
-      _detailPaneInfo.maxDx = constraints.maxWidth;
+      _detailPaneDetails.minDx = _masterPaneDetails.maxDx + kResizeBarWidth;
+      _detailPaneDetails.maxDx = constraints.maxWidth;
     } else {
       // we are in compact mode (only master or detail)
-      _detailPaneInfo.minDx = 0;
-      _detailPaneInfo.maxDx = constraints.maxWidth;
-      _masterPaneInfo.minDx = 0;
-      _masterPaneInfo.maxDx = constraints.maxWidth;
+      _detailPaneDetails.minDx = 0;
+      _detailPaneDetails.maxDx = constraints.maxWidth;
+      _masterPaneDetails.minDx = 0;
+      _masterPaneDetails.maxDx = constraints.maxWidth;
     }
     // can be calculated from current information
-    _detailPaneInfo.width = _detailPaneInfo.maxDx - _detailPaneInfo.minDx;
-    _masterPaneInfo.width = _masterPaneInfo.maxDx - _masterPaneInfo.minDx;
-
-    // Calc screen sized
-    _screenHeight = constraints.maxHeight;
-    _screenWidth = constraints.maxWidth;
+    _detailPaneDetails.width =
+        _detailPaneDetails.maxDx - _detailPaneDetails.minDx;
+    _masterPaneDetails.width =
+        _masterPaneDetails.maxDx - _masterPaneDetails.minDx;
   }
 
   void _handleBreakpoint(BoxConstraints constraints) {
@@ -285,16 +281,27 @@ class AppScreenState extends State<AppScreen> {
 
   bool _showContext = false;
   Widget _currentContextMenu;
-  double _dxContext;
-  double _dyContext;
+  double _currentContextDx;
+  double _currentContextDy;
+  double _currentContextWidth;
+  double _currentContextHeight;
 
-  /// Show ContextMenu
-  void showContextMenu({@required Widget menu, @required Offset offset}) {
-    // TODO: we have to have: currentViewMaxDx and y
-
+  /// Setup ContextMenu to be shown on build
+  void _setupContextMenu(
+      {@required Widget menu,
+      @required double menuWidth,
+      @required double menuHeight,
+      @required Offset offset,
+      @required Detail constraints}) {
     if (menu != null) {
-      print('CONTEXT MENU: $offset');
-      _calcContextMenuPosition(positionDx: offset.dx, positionDy: offset.dy);
+      _calcContextMenuPosition(
+          positionDx: offset.dx,
+          positionDy: offset.dy,
+          contextMenuSize: Size(menuWidth, menuHeight),
+          currentConstraints: constraints);
+      _currentContextWidth = menuWidth;
+      _currentContextHeight = menuHeight;
+
       _currentContextMenu = menu;
       setState(() {
         _showContext = true;
@@ -305,34 +312,74 @@ class AppScreenState extends State<AppScreen> {
       });
   }
 
-  /// Show ContextMenu for MasterPane or DetailPane
-  void _showMasterOrDetailPaneContextMenu({@required Offset offset}) {
-    print('Show contextMenu');
-
+  void showContextMenu(
+      {@required Offset offset,
+      @required Widget menu,
+      @required double width,
+      @required double height}) {
+    Detail currentConstraints;
     if (_isDesktop) {
       // desktop mode
-      if (offset.dx > _screenWidth - _detailPaneWidth) {
-        print('DETAIL CONTEXT desktop');
-        showContextMenu(menu: widget.detailContextMenu, offset: offset);
+      if (offset.dx >= detailPaneDetails.minDx)
+        currentConstraints = detailPaneDetails;
+      else
+        currentConstraints = masterPaneDetails;
+    } else {
+      // Compact mode
+      if (_compactShowDetail)
+        currentConstraints = detailPaneDetails;
+      else
+        currentConstraints = masterPaneDetails;
+    }
+    _setupContextMenu(
+        menu: menu,
+        offset: offset,
+        constraints: currentConstraints,
+        menuWidth: width,
+        menuHeight: height);
+  }
+
+  /// Show ContextMenu for MasterPane or DetailPane
+  void _showMasterOrDetailPaneContextMenu({@required Offset offset}) {
+    if (_isDesktop) {
+      // desktop mode
+      if (offset.dx >= detailPaneDetails.minDx) {
+        _setupContextMenu(
+            menu: widget.detailContextMenu.child,
+            menuWidth: widget.detailContextMenu.width,
+            menuHeight: widget.detailContextMenu.height,
+            offset: offset,
+            constraints: detailPaneDetails);
       } else {
-        print('MASTER CONTEXT desktop');
-        showContextMenu(menu: widget.masterContextMenu, offset: offset);
+        _setupContextMenu(
+            menu: widget.masterContextMenu.child,
+            menuWidth: widget.masterContextMenu.width,
+            menuHeight: widget.masterContextMenu.height,
+            offset: offset,
+            constraints: masterPaneDetails);
       }
     } else {
       // Compact mode
       if (_compactShowDetail) {
-        print('DETAIL CONTEXT compact');
-        showContextMenu(menu: widget.detailContextMenu, offset: offset);
+        _setupContextMenu(
+            menu: widget.detailContextMenu.child,
+            menuWidth: widget.detailContextMenu.width,
+            menuHeight: widget.detailContextMenu.height,
+            offset: offset,
+            constraints: detailPaneDetails);
       } else {
-        print('MASTER CONTEXT compact');
-        showContextMenu(menu: widget.masterContextMenu, offset: offset);
+        _setupContextMenu(
+            menu: widget.masterContextMenu.child,
+            menuWidth: widget.masterContextMenu.width,
+            menuHeight: widget.masterContextMenu.height,
+            offset: offset,
+            constraints: masterPaneDetails);
       }
     }
   }
 
   /// Hide ContextMenu
   void hideContextMenu() {
-    print('Hide contextMenu');
     setState(() {
       _showContext = false;
     });
@@ -345,23 +392,21 @@ class AppScreenState extends State<AppScreen> {
       @required double positionDy,
       Detail currentConstraints,
       Size contextMenuSize = const Size(150, 200),
-      bool centerContextMenu = false}) {
-    currentConstraints = currentConstraints ?? _detailPaneInfo;
+      bool centerContextMenu = true}) {
+    currentConstraints = currentConstraints ?? _detailPaneDetails;
     // prerequists
-    print('Currentconstraints: $currentConstraints');
+    // print('Currentconstraints: $currentConstraints');
 
-    _dxContext = positionDx;
-    _dyContext = positionDy;
-    print('START DX: $_dxContext, DY: $_dyContext');
+    _currentContextDx = positionDx;
+    _currentContextDy = positionDy;
+    // print('START DX: $_dxContext, DY: $_dyContext');
 
     if (centerContextMenu) {
-      // TODO: OR _contextPlacementCenter == ContexPlacementCenter.longpress && logpress == true)
       // adjust position to center
-      _dxContext = positionDx - (contextMenuSize.width / 2);
-      _dyContext = positionDy - (contextMenuSize.height / 2);
-      // TODO: Check minium placement (is menuShown, isDrawer, is?????)
+      _currentContextDx = positionDx - (contextMenuSize.width / 2);
+      _currentContextDy = positionDy - (contextMenuSize.height / 2);
     }
-    print('Center DX: $_dxContext, DY: $_dyContext');
+    // print('Center DX: $_dxContext, DY: $_dyContext');
     // check if inside boundaries
     // I need current boundaries...
 
@@ -370,19 +415,21 @@ class AppScreenState extends State<AppScreen> {
         currentConstraints.maxDx - contextMenuSize.width - 10;
     double contextMenuMaxDy =
         currentConstraints.maxDy - contextMenuSize.height - 10;
-    print('Max DX: $contextMenuMaxDx, DY: $contextMenuMaxDy');
+    // print('Max DX: $contextMenuMaxDx, DY: $contextMenuMaxDy');
 
     // Choose the safe offset for contextmenu to be shown
-    if (contextMenuMaxDx < _dxContext) _dxContext = contextMenuMaxDx;
-    if (contextMenuMaxDy < _dyContext) _dyContext = contextMenuMaxDy;
-    if (currentConstraints.minDx > _dxContext)
-      _dxContext = currentConstraints.minDx;
-    if (currentConstraints.minDy > _dyContext)
-      _dyContext = currentConstraints.minDy;
+    if (contextMenuMaxDx < _currentContextDx)
+      _currentContextDx = contextMenuMaxDx;
+    if (contextMenuMaxDy < _currentContextDy)
+      _currentContextDy = contextMenuMaxDy;
+    if (currentConstraints.minDx > _currentContextDx)
+      _currentContextDx = currentConstraints.minDx;
+    if (currentConstraints.minDy > _currentContextDy)
+      _currentContextDy = currentConstraints.minDy;
     // what if ContextMenu bigger than current boundaries?
     if (contextMenuMaxDx < 0) _showContext = false;
     if (contextMenuMaxDy < 0) _showContext = false;
-    print('Chosen DX: $_dxContext, DY: $_dyContext, Show: $_showContext');
+    // print('Chosen DX: $_dxContext, DY: $_dyContext, Show: $_showContext');
   }
 
   final FocusNode _focusNode = FocusNode();
@@ -432,7 +479,7 @@ class AppScreenState extends State<AppScreen> {
   void initState() {
     _detailPaneWidth = widget.detailWidth;
     if (widget.masterContextMenu != null)
-      _currentContextMenu = widget.masterContextMenu;
+      _currentContextMenu = widget.masterContextMenu.child;
     super.initState();
   }
 
@@ -450,15 +497,6 @@ class AppScreenState extends State<AppScreen> {
           return GestureDetector(
             onLongPressStart: (details) {
               print('Longpres Start: ${details.globalPosition}');
-            },
-            onLongPressMoveUpdate: (details) {
-              print('Longpres Move: $details');
-            },
-            onLongPressEnd: (details) {
-              print('Longpres End: $details');
-            },
-            onLongPress: () {
-              print('LongPress');
             },
             child: RawKeyboardListener(
               focusNode: _focusNode,
@@ -523,8 +561,8 @@ class AppScreenState extends State<AppScreen> {
 
   Positioned _showContextMenu() {
     return Positioned(
-      left: _dxContext,
-      top: _dyContext,
+      left: _currentContextDx,
+      top: _currentContextDy,
       child: TweenAnimationBuilder(
         duration: Duration(milliseconds: 200),
         builder: (BuildContext context, value, Widget child) {
@@ -537,16 +575,17 @@ class AppScreenState extends State<AppScreen> {
         tween: Tween(begin: 0.0, end: 1.0),
         child: Listener(
             behavior: HitTestBehavior.opaque,
-            onPointerSignal: (event) {
-              print('${event.toString()}');
-            },
+            onPointerSignal: (event) {},
             onPointerDown: (event) {
               if (event.buttons == 2) // højre klik
               {
                 hideContextMenu();
               }
             },
-            child: _currentContextMenu),
+            child: SizedBox(
+                height: _currentContextHeight,
+                width: _currentContextWidth,
+                child: _currentContextMenu)),
       ),
     );
   }
@@ -564,7 +603,7 @@ class AppScreenState extends State<AppScreen> {
                 if (!_compactShowDetail) _masterPane(),
                 if (_compactShowDetail && widget.detailPane != null)
                   SizedBox(
-                      height: _paneHeight,
+                      height: _detailPaneDetails.height,
                       width: constraints.maxWidth,
                       child: _detailPane()),
               ],
@@ -642,15 +681,16 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  Expanded _masterPane() {
+  Widget _masterPane() {
     return Expanded(
-        child: SizedBox(height: _paneHeight, child: widget.masterPane));
+        child: SizedBox(
+            height: _masterPaneDetails.height, child: widget.masterPane));
   }
 
-  SizedBox _detailPane() {
+  Widget _detailPane() {
     return SizedBox(
-      width: getDetailPaneWidth(),
-      height: _paneHeight,
+      width: _detailPaneDetails.width,
+      height: _detailPaneDetails.height,
       child: widget.detailPane,
     );
   }
@@ -665,7 +705,7 @@ class AppScreenState extends State<AppScreen> {
         },
         child: SizedBox(
           width: kResizeBarWidth,
-          height: _paneHeight,
+          height: _masterPaneDetails.height,
           child: Container(
             // color: Colors.amber,
             decoration: BoxDecoration(

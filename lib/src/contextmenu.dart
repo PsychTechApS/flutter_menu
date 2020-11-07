@@ -3,20 +3,20 @@ import 'appscreen.dart';
 
 enum ContextPlacementCenter { longPressOnly, never, always }
 
-abstract class ContextMenuType extends StatelessWidget {}
+abstract class ContextMenuWidget extends StatelessWidget {}
 
 abstract class ContextMenuItemType extends StatelessWidget {}
 
-class ContextMenu extends StatelessWidget {
-  final ContextMenuType menu;
-  final double menuWidth;
-  final double menuHeight;
+class ContextMenuContainer extends StatelessWidget {
+  final ContextMenuWidget menu;
+  final double width;
+  final double height;
   final Widget child;
-  const ContextMenu(
+  const ContextMenuContainer(
       {Key key,
       @required this.menu,
-      this.menuHeight,
-      this.menuWidth,
+      @required this.height,
+      @required this.width,
       this.child})
       : super(key: key);
   @override
@@ -27,8 +27,11 @@ class ContextMenu extends StatelessWidget {
         onPointerDown: (event) {
           if (event.buttons == 2) // right click
           {
-            context.appScreen
-                .showContextMenu(offset: event.position, menu: menu);
+            context.appScreen.showContextMenu(
+                offset: event.position,
+                menu: menu,
+                width: width,
+                height: height);
           } else
             context.appScreen.hideContextMenu();
         },
