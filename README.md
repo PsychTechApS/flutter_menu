@@ -1,6 +1,6 @@
 # flutter_menu
 
-This is a UI kit for developed for web but works for flutter desktop as well (is tested on Flutter Windows). 
+This is a UI framework developed for web but works for flutter desktop as well (is tested on Flutter Windows). 
 
 Try it out: http://www.flutter.psychtech.mitspace.dk/
 
