@@ -137,9 +137,9 @@ class _ScreenState extends State<Screen> {
         ],
         masterPane: masterPane(),
         detailPane: detailPane(),
-        detailWidth: 600,
-        detailMinWidth: 400,
-        detailMaxWidth: 800,
+        // masterPaneWidth: 600,
+        // masterPaneMinWidth: 400,
+        // masterPaneMaxWidth: 800,
         onBreakpointChange: () {
           setState(() {
             print('Breakpoint change');

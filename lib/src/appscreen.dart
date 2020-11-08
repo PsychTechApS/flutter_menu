@@ -23,10 +23,12 @@ class AppScreen extends StatefulWidget {
   final Builder masterPane;
 
   final Builder detailPane;
-  final double detailMinWidth;
-  final double detailMaxWidth;
-  final double detailWidth;
-  final bool detailFixedWidth;
+  final double masterPaneFlex;
+  final double detailPaneFlex;
+  final double masterPaneMinWidth;
+  final double detailPaneMinWidth;
+
+  final bool masterPaneFixedWidth;
   final double desktopBreakpoint;
   final Function onBreakpointChange;
 
@@ -44,11 +46,12 @@ class AppScreen extends StatefulWidget {
     this.detailPane,
     this.masterContextMenu,
     this.detailContextMenu,
-    this.detailMinWidth = 500,
-    this.detailMaxWidth = 300,
-    this.detailWidth = 400,
-    this.detailFixedWidth = false,
-    this.desktopBreakpoint = 800,
+    this.masterPaneFlex = 1,
+    this.detailPaneFlex = 1,
+    this.masterPaneMinWidth = 600,
+    this.detailPaneMinWidth = 600,
+    this.masterPaneFixedWidth = false,
+    this.desktopBreakpoint = 1200,
 
     /// Use this to update ui when desktop vs compact change happens
     this.onBreakpointChange,
@@ -57,7 +60,8 @@ class AppScreen extends StatefulWidget {
     this.trailing,
   })  : assert(menuList != null, "menuList is missing!"),
         assert(masterPane != null, "masterPane is missing!"),
-        assert(detailMinWidth < detailMaxWidth, "Min width > max width!"),
+        assert((masterPaneMinWidth + detailPaneMinWidth) <= desktopBreakpoint,
+            "Master + Detail min Width has to be less than desktopbreakpoint !"),
         super(key: key);
 
   static AppScreenState of(BuildContext context) {
@@ -146,7 +150,7 @@ class AppScreenState extends State<AppScreen> {
   /// info about detailPane
   get screenDetails => _screenDetails;
 
-  double _detailPaneWidth;
+  double _masterPaneWidth;
 
   bool _drawerIsShown = false; // TODO: implement drawer
   double _drawerWidth = 0; // TODO: implement drawer
@@ -179,8 +183,7 @@ class AppScreenState extends State<AppScreen> {
       // we have desktop view with master AND detail
       // remember the slider width if shown
       _masterPaneDetails.minDx = _drawerIsShown ? _drawerWidth : 0;
-      _masterPaneDetails.maxDx =
-          constraints.maxWidth - _detailPaneWidth - kResizeBarWidth;
+      _masterPaneDetails.maxDx = _masterPaneDetails.minDx + _masterPaneWidth;
       _detailPaneDetails.minDx = _masterPaneDetails.maxDx + kResizeBarWidth;
       _detailPaneDetails.maxDx = constraints.maxWidth;
     } else {
@@ -212,6 +215,7 @@ class AppScreenState extends State<AppScreen> {
   void _handleConstraintChange(BoxConstraints constraints) {
     if (constraints.maxHeight != _lastScreenHeight ||
         constraints.maxWidth != _lastScreenWidth) {
+      _calcFlexWidth(maxWidth: constraints.maxWidth);
       _showContext = false;
       _lastScreenHeight = constraints.maxHeight;
       _lastScreenWidth = constraints.maxWidth;
@@ -225,14 +229,72 @@ class AppScreenState extends State<AppScreen> {
     });
   }
 
-  void setDetailPaneWidth({@required double width}) {
-    if (width < widget.detailMinWidth)
-      _detailPaneWidth = widget.detailMinWidth;
-    else if (width > widget.detailMaxWidth)
-      _detailPaneWidth = widget.detailMaxWidth;
-    else
-      _detailPaneWidth = width;
-    setState(() {});
+  double _maxMasterPaneWidth; // Used to keep resizebar within boundaries
+
+  void _calcFlexWidth({double maxWidth}) {
+    double screenFlex = widget.masterPaneFlex + widget.detailPaneFlex;
+    _masterPaneWidth = maxWidth / screenFlex * widget.masterPaneFlex;
+    // TODO: TJEK DENNE BEREGNING VED ÆNDRING I WIDTH:
+    _maxMasterPaneWidth =
+        maxWidth - widget.detailPaneMinWidth - kResizeBarWidth;
+    if (_masterPaneWidth < widget.masterPaneMinWidth)
+      _masterPaneWidth = widget.masterPaneMinWidth;
+    else if (_masterPaneWidth > _maxMasterPaneWidth)
+      _masterPaneWidth = _maxMasterPaneWidth;
+  }
+
+  void _setMasterPaneWidth(
+      {@required double width, @required BoxConstraints constraints}) {
+    if (_maxMasterPaneWidth < widget.masterPaneMinWidth)
+      _maxMasterPaneWidth = widget.masterPaneMinWidth;
+    _calcFlexWidth(maxWidth: constraints.maxWidth);
+
+    if (_masterPaneWidth > widget.masterPaneMinWidth) {
+      if (width < widget.masterPaneMinWidth)
+        _masterPaneWidth = widget.masterPaneMinWidth;
+      else if (width > _maxMasterPaneWidth)
+        _masterPaneWidth = _maxMasterPaneWidth;
+      else
+        _masterPaneWidth = width;
+      setState(() {});
+    }
+
+    // if (_masterPaneWidth > _minMasterPaneWidth && _masterPaneWidth < _maxMasterPaneWidth) {
+    //   if (width < _minMasterPaneWidth)
+    //     _masterPaneWidth = _minMasterPaneWidth;
+    //   else if (width > _maxMasterPaneWidth)
+    //     _masterPaneWidth = _maxMasterPaneWidth;
+    //   else
+    //     _masterPaneWidth = width;
+    //   setState(() {});
+    // }
+
+    // print('Screen: ${constraints.maxWidth}');
+    // double _minMasterPaneWidth = constraints.maxWidth /
+    //     (masterPaneMinFlex + detailPaneMinFlex) *
+    //     masterPaneMinFlex;
+    // print('MinMaster: $_minMasterPaneWidth');
+    // double _maxMasterPaneWidth = constraints.maxWidth /
+    //     (masterPaneMaxFlex + detailPaneMaxFlex) *
+    //     masterPaneMaxFlex;
+    // print('MaxMaster: $_maxMasterPaneWidth');
+
+    // if (width < widget.masterPaneMinWidth)
+    //   _masterPaneWidth = widget.masterPaneMinWidth;
+    // else if (width > widget.masterPaneMaxWidth)
+    //   _masterPaneWidth = widget.masterPaneMaxWidth;
+    // else
+    //   _masterPaneWidth = width;
+
+    // if (width < _minMasterPaneWidth)
+    //   _masterPaneWidth = _minMasterPaneWidth;
+    // else if (width > _maxMasterPaneWidth)
+    //   _masterPaneWidth = _maxMasterPaneWidth;
+    // else
+    //   _masterPaneWidth = width;
+
+    print(
+        'PANE NEW ($width) : Master(${_masterPaneDetails.width}) : DETAIL(${_detailPaneDetails.width})');
   }
 
   bool _isDesktop = true;
@@ -477,7 +539,6 @@ class AppScreenState extends State<AppScreen> {
 
   @override
   void initState() {
-    _detailPaneWidth = widget.detailWidth;
     if (widget.masterContextMenu != null)
       _currentContextMenu = widget.masterContextMenu.child;
     super.initState();
@@ -682,9 +743,10 @@ class AppScreenState extends State<AppScreen> {
   }
 
   Widget _masterPane() {
-    return Expanded(
-        child: SizedBox(
-            height: _masterPaneDetails.height, child: widget.masterPane));
+    return SizedBox(
+        height: _masterPaneDetails.height,
+        width: _masterPaneDetails.width,
+        child: widget.masterPane);
   }
 
   Widget _detailPane() {
@@ -697,11 +759,14 @@ class AppScreenState extends State<AppScreen> {
 
   MouseRegion _resizeBar(BoxConstraints constraints) {
     return MouseRegion(
-      cursor: SystemMouseCursors.resizeColumn,
+      cursor: !widget.masterPaneFixedWidth
+          ? SystemMouseCursors.resizeColumn
+          : SystemMouseCursors.basic,
       child: GestureDetector(
         onPanUpdate: (details) {
-          setDetailPaneWidth(
-              width: constraints.maxWidth - details.globalPosition.dx);
+          if (!widget.masterPaneFixedWidth)
+            _setMasterPaneWidth(
+                width: details.globalPosition.dx, constraints: constraints);
         },
         child: SizedBox(
           width: kResizeBarWidth,

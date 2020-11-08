@@ -1,10 +1,14 @@
+## [0.1.3] - 2020-11-?
+
+- BREAKING: Pane sizing has changed: You specifiy flex for Master and Detail and minimum sizes for Master and Detail.
+
 ## [0.1.2] - 2020-11-07
 
 - Animation added to context menu
 - Context menu stay inside boundaries of Master or Detail pane
 - BREAKING: masterContextMenu and detailContextMenu of new type ContextMenu
 - BREAKING: ContextMenu (for custom widget menus) is now ContextMenuContainer.
-- BREAKING: ContextMenus has to specify width and height (new feature: contextmenu stays within pane and new center )
+- BREAKING: ContextMenus has to specify width and height (new feature: contextmenu stays within pane and new center option )
 
 ## [0.1.1] - 2020-11-04
 
