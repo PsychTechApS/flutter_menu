@@ -1,3 +1,8 @@
+## [0.2.2] - 2020-11-09
+
+- FEATURE: New ResizeBar() to customize the look of the resizeBar. Touch screens can now use the circular helper to move it around
+           use leftColor and RightColor to get at default BoxDecoration or customize with decoration and helperDecoration.
+
 ## [0.2.1] - 2020-11-09
 
 - BREAKING: Pane sizing has changed: You specifiy flex for Master and Detail and minimum sizes for Master and Detail. desktopBreakpoint has to be equal to or larger than min sizes for Master + Detail.

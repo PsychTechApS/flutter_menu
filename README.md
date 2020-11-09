@@ -13,7 +13,7 @@ The package gives you a desktop like experience on web (responsive to touch or d
 - [x] Master, detail views (Left pane, right pane)
 - [x] Pane sizes can be changed by user (or not - you choose).
 - [x] Context menu (right click) for Master, Detail and widgets
-- [x] Upcomming: Longpress for contextmenu (for touch displays). Centered and animated
+- [x] Longpress for contextmenu (for touch displays). Centered and animated
 - [ ] Choose between touch UI or desktop UI (can be change by user)
 - [ ] More predefined contextmenus to choose from
 - [ ] Flexible pane sizes as well as min/max sized

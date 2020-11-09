@@ -145,6 +145,9 @@ class _ScreenState extends State<Screen> {
             print('Breakpoint change');
           });
         },
+        resizeBar: ResizeBar(
+            leftColor: masterBackgroundColor,
+            rightColor: detailBackgroundColor),
       ),
     );
   }

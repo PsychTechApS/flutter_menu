@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+
 import 'package:flutter_menu/flutter_menu.dart';
 
 import 'menu_model.dart';
 
-/// extension for quick access to menu actions and informations
 extension BuildContextMenuFinder on BuildContext {
   AppScreenState get appScreen => AppScreen.of(this);
 }
@@ -29,6 +29,8 @@ class AppScreen extends StatefulWidget {
   final double desktopBreakpoint;
   final Function onBreakpointChange;
 
+  final ResizeBar resizeBar;
+
   final Builder drawerPane;
   final Widget leading;
   final Widget trailing;
@@ -38,23 +40,24 @@ class AppScreen extends StatefulWidget {
 
   const AppScreen({
     Key key,
+
+    /// Use this to update ui when desktop vs compact change happens
     this.menuList,
     this.masterPane,
     this.detailPane,
-    this.masterContextMenu,
-    this.detailContextMenu,
     this.masterPaneFlex = 1,
     this.detailPaneFlex = 1,
     this.masterPaneMinWidth = 600,
     this.detailPaneMinWidth = 600,
     this.masterPaneFixedWidth = false,
     this.desktopBreakpoint = 1200,
-
-    /// Use this to update ui when desktop vs compact change happens
     this.onBreakpointChange,
+    this.resizeBar,
     this.drawerPane,
     this.leading,
     this.trailing,
+    this.masterContextMenu,
+    this.detailContextMenu,
   })  : assert(menuList != null, "menuList is missing!"),
         assert(masterPane != null, "masterPane is missing!"),
         assert((masterPaneMinWidth + detailPaneMinWidth) <= desktopBreakpoint,
@@ -79,6 +82,7 @@ class AppScreenState extends State<AppScreen> {
   bool _showShortcutOverlay = true;
   double _lastScreenWidth = 0;
   double _lastScreenHeight = 0;
+  ResizeBar _resizeBar;
 
   /// True = Menu is Shown
   bool get isMenuShown => _menuIsShown;
@@ -151,7 +155,6 @@ class AppScreenState extends State<AppScreen> {
 
   bool _drawerIsShown = false; // TODO: implement drawer
   double _drawerWidth = 0; // TODO: implement drawer
-  double kResizeBarWidth = 5; // TODO: global or parameter
 
   void _calcScreenAndPaneSize(BoxConstraints constraints) {
     // Calc screen sized
@@ -181,7 +184,7 @@ class AppScreenState extends State<AppScreen> {
       // remember the slider width if shown
       _masterPaneDetails.minDx = _drawerIsShown ? _drawerWidth : 0;
       _masterPaneDetails.maxDx = _masterPaneDetails.minDx + _masterPaneWidth;
-      _detailPaneDetails.minDx = _masterPaneDetails.maxDx + kResizeBarWidth;
+      _detailPaneDetails.minDx = _masterPaneDetails.maxDx + _resizeBar.width;
       _detailPaneDetails.maxDx = constraints.maxWidth;
     } else {
       // we are in compact mode (only master or detail)
@@ -233,7 +236,7 @@ class AppScreenState extends State<AppScreen> {
     _masterPaneWidth = maxWidth / screenFlex * widget.masterPaneFlex;
     // TODO: TJEK DENNE BEREGNING VED ÆNDRING I WIDTH:
     _maxMasterPaneWidth =
-        maxWidth - widget.detailPaneMinWidth - kResizeBarWidth;
+        maxWidth - widget.detailPaneMinWidth - _resizeBar.width;
     if (_masterPaneWidth < widget.masterPaneMinWidth)
       _masterPaneWidth = widget.masterPaneMinWidth;
     else if (_masterPaneWidth > _maxMasterPaneWidth)
@@ -550,8 +553,31 @@ class AppScreenState extends State<AppScreen> {
     }
   }
 
+  void _setResizeBarColor() {
+    _resizeBar.decoration = BoxDecoration(
+      gradient: LinearGradient(
+          colors: [_resizeBar.leftColor, _resizeBar.rightColor],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight),
+    );
+    _resizeBar.helperDecoration = BoxDecoration(
+      gradient: LinearGradient(
+          colors: [_resizeBar.rightColor, _resizeBar.leftColor],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight),
+    );
+  }
+
+  void _setupResizeBar() {
+    _resizeBar = widget.resizeBar ?? kDefaultResizeBar;
+    if (_resizeBar.leftColor != null && _resizeBar.rightColor != null) {
+      _setResizeBarColor();
+    }
+  }
+
   @override
   void initState() {
+    _setupResizeBar();
     if (widget.masterContextMenu != null)
       _currentContextMenu = widget.masterContextMenu.child;
     super.initState();
@@ -563,6 +589,7 @@ class AppScreenState extends State<AppScreen> {
       data: this,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          _setupResizeBar();
           _handleConstraintChange(constraints);
           _calcScreenAndPaneSize(constraints);
 
@@ -602,7 +629,7 @@ class AppScreenState extends State<AppScreen> {
                 if (widget.detailPane != null)
                   Row(
                     children: [
-                      _resizeBar(constraints),
+                      _showResizeBar(constraints),
                       _detailPane(),
                     ],
                   ),
@@ -610,12 +637,42 @@ class AppScreenState extends State<AppScreen> {
             ),
           ],
         ),
+        if (widget.detailPane != null) _resizeBarIcon(constraints),
         _listenForAppClick(),
         if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
         if (_showShortcutOverlay && shortcutLabel != null) _shortcutOverlay(),
       ],
     );
+  }
+
+  Positioned _resizeBarIcon(BoxConstraints constraints) {
+    return Positioned(
+        left: _detailPaneDetails.minDx -
+            _resizeBar.helperSize / 2 -
+            _resizeBar.width / 2,
+        top: _detailPaneDetails.maxDy - _resizeBar.helperPos,
+        child: GestureDetector(
+          onLongPressStart: (details) {
+            // Do nothing if user accidentially longpresses (do not open contextmenu)
+          },
+          onPanUpdate: (details) {
+            if (!widget.masterPaneFixedWidth)
+              _setMasterPaneWidth(
+                  width: details.globalPosition.dx, constraints: constraints);
+          },
+          child: SizedBox(
+            width: _resizeBar.helperSize,
+            height: _resizeBar.helperSize,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(_resizeBar.helperSize),
+              child: Container(decoration: _resizeBar.helperDecoration),
+            ),
+          ),
+        )
+        // Icon(_resizeBar.icon,
+        //     size: _resizeBar.iconSize, color: _resizeBar.iconColor)),
+        );
   }
 
   Listener _listenForAppClick() {
@@ -778,7 +835,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  MouseRegion _resizeBar(BoxConstraints constraints) {
+  MouseRegion _showResizeBar(BoxConstraints constraints) {
     return MouseRegion(
       cursor: !widget.masterPaneFixedWidth
           ? SystemMouseCursors.resizeColumn
@@ -793,17 +850,11 @@ class AppScreenState extends State<AppScreen> {
                 width: details.globalPosition.dx, constraints: constraints);
         },
         child: SizedBox(
-          width: kResizeBarWidth,
+          width: _resizeBar.width,
           height: _masterPaneDetails.height,
           child: Container(
             // color: Colors.amber,
-            decoration: BoxDecoration(
-              // color: Colors.teal,
-              gradient: LinearGradient(
-                  colors: [Colors.teal, Colors.teal[200]],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight),
-            ),
+            decoration: _resizeBar.decoration,
           ),
         ),
       ),
