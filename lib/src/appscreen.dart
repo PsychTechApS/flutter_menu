@@ -38,6 +38,8 @@ class AppScreen extends StatefulWidget {
   final ContextMenu masterContextMenu;
   final ContextMenu detailContextMenu;
 
+  final bool touchMode;
+
   const AppScreen({
     Key key,
 
@@ -58,6 +60,7 @@ class AppScreen extends StatefulWidget {
     this.trailing,
     this.masterContextMenu,
     this.detailContextMenu,
+    this.touchMode = false,
   })  : assert(menuList != null, "menuList is missing!"),
         assert(masterPane != null, "masterPane is missing!"),
         assert((masterPaneMinWidth + detailPaneMinWidth) <= desktopBreakpoint,
@@ -79,6 +82,7 @@ class AppScreen extends StatefulWidget {
 class AppScreenState extends State<AppScreen> {
   bool _menuIsOpen = false;
   bool _menuIsShown = true;
+  bool _touchMode = false;
   bool _showShortcutOverlay = true;
   double _lastScreenWidth = 0;
   double _lastScreenHeight = 0;
@@ -134,7 +138,9 @@ class AppScreenState extends State<AppScreen> {
     }
   }
 
-  final double kMenuHeight = 30;
+  final double kMenuBarHeight = 30;
+  final double kMenuTouchBarHeight = 40;
+  double _currentMenuHeight;
 
   Detail _masterPaneDetails = Detail();
 
@@ -163,15 +169,15 @@ class AppScreenState extends State<AppScreen> {
     _screenDetails.minDx = 0;
     _screenDetails.maxDx = constraints.maxWidth;
     _screenDetails.minDy = 0;
-    _screenDetails.minDx = constraints.minWidth;
+    _screenDetails.maxDy = constraints.maxHeight;
 
     // calc the pane height info
     _detailPaneDetails.maxDy = constraints.maxHeight;
     _masterPaneDetails.maxDy = constraints.maxHeight;
 
     // is menu shown it has to be withdrawen from pane height
-    _detailPaneDetails.minDy = _menuIsShown ? kMenuHeight : 0;
-    _masterPaneDetails.minDy = _menuIsShown ? kMenuHeight : 0;
+    _detailPaneDetails.minDy = _menuIsShown ? _currentMenuHeight : 0;
+    _masterPaneDetails.minDy = _menuIsShown ? _currentMenuHeight : 0;
 
     _detailPaneDetails.height =
         _detailPaneDetails.maxDy - _detailPaneDetails.minDy;
@@ -511,12 +517,24 @@ class AppScreenState extends State<AppScreen> {
   }
 
   final FocusNode _focusNode = FocusNode();
-  String shortcutLabel;
+  String _shortcutLabel;
 
   @override
   void dispose() {
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void showShortCutOverlay({@required String message}) {
+    Timer(Duration(seconds: 2), () {
+      // remove the label after 2 seconds
+      setState(() {
+        _shortcutLabel = '';
+      });
+    });
+    setState(() {
+      _shortcutLabel = message;
+    });
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
@@ -532,15 +550,7 @@ class AppScreenState extends State<AppScreen> {
                 event.isShiftPressed == listItem.shortcut.shift &&
                 event.logicalKey == listItem.shortcut.key) {
               if (_showShortcutOverlay) {
-                Timer(Duration(seconds: 2), () {
-                  // remove the label after 2 seconds
-                  setState(() {
-                    shortcutLabel = '';
-                  });
-                });
-                setState(() {
-                  shortcutLabel = _shortcutText(listItem.shortcut);
-                });
+                showShortCutOverlay(message: _shortcutText(listItem.shortcut));
               }
               if (listItem.onPressed != null) {
                 closeMenu();
@@ -575,9 +585,52 @@ class AppScreenState extends State<AppScreen> {
     }
   }
 
+  /// Returns true if touch mode is active
+  bool isTouchMode() {
+    return _touchMode;
+  }
+
+  /// Returns true if desktop mode is active
+  bool isDesktopMode() {
+    return !_touchMode;
+  }
+
+  void _setTouchMode() {
+    _touchMode = true;
+    _currentMenuHeight = kMenuTouchBarHeight;
+  }
+
+  /// activate touch mode
+  void setTouchMode() {
+    setState(() {
+      _setTouchMode();
+    });
+  }
+
+  void _setDesktopMode() {
+    _touchMode = false;
+    _currentMenuHeight = kMenuBarHeight;
+  }
+
+  /// activate desktop mode
+  void setDesktopMode() {
+    setState(() {
+      _setDesktopMode();
+    });
+  }
+
+  void _setupMenu() {
+    if (widget.touchMode) {
+      _setTouchMode();
+    } else {
+      _setDesktopMode();
+    }
+  }
+
   @override
   void initState() {
     _setupResizeBar();
+    _setupMenu();
     if (widget.masterContextMenu != null)
       _currentContextMenu = widget.masterContextMenu.child;
     super.initState();
@@ -622,7 +675,8 @@ class AppScreenState extends State<AppScreen> {
           // mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_menuIsShown) _menuBar(),
+            if (_menuIsShown && !_touchMode) _menuBar(),
+            if (_menuIsShown && _touchMode) _menuTouchBar(),
             Row(
               children: [
                 _masterPane(),
@@ -641,7 +695,7 @@ class AppScreenState extends State<AppScreen> {
         _listenForAppClick(),
         if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
-        if (_showShortcutOverlay && shortcutLabel != null) _shortcutOverlay(),
+        if (_showShortcutOverlay && _shortcutLabel != null) _shortcutOverlay(),
       ],
     );
   }
@@ -736,7 +790,8 @@ class AppScreenState extends State<AppScreen> {
           // mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_menuIsShown) _menuBar(),
+            if (_menuIsShown && !_touchMode) _menuBar(),
+            if (_menuIsShown && _touchMode) _menuTouchBar(),
             Row(
               children: [
                 if (!_compactShowDetail) _masterPane(),
@@ -752,14 +807,14 @@ class AppScreenState extends State<AppScreen> {
         _listenForAppClick(),
         if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
-        if (_showShortcutOverlay && shortcutLabel != null) _shortcutOverlay(),
+        if (_showShortcutOverlay && _shortcutLabel != null) _shortcutOverlay(),
       ],
     );
   }
 
   SizedBox _menuBar() {
     return SizedBox(
-      height: 30,
+      height: _currentMenuHeight,
       width: double.infinity,
       child: Container(
           color: Colors.blueGrey,
@@ -782,28 +837,88 @@ class AppScreenState extends State<AppScreen> {
                 Row(
                   children: _buildMenuList(),
                 ),
-              if (widget.trailing != null)
-                Expanded(
-                    child: Align(
-                        alignment: Alignment.centerRight,
-                        child: widget.trailing)),
+              Expanded(
+                  child: Align(
+                      alignment: Alignment.centerRight, child: _touchButton())),
             ],
           )),
+    );
+  }
+
+  SizedBox _menuTouchBar() {
+    return SizedBox(
+      height: _currentMenuHeight,
+      width: double.infinity,
+      child: Container(
+          color: Colors.blueGrey,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (widget.leading != null)
+                Row(
+                  children: [
+                    widget.leading,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, right: 4),
+                      child: SizedBox(
+                          width: 2,
+                          child: Container(color: Colors.blueGrey[100])),
+                    ),
+                  ],
+                ),
+              if (widget.menuList != null)
+                Row(
+                  children: _buildMenuList(),
+                ),
+              Expanded(
+                  child: Align(
+                      alignment: Alignment.centerRight, child: _touchButton())),
+            ],
+          )),
+    );
+  }
+
+  Widget _touchButton() {
+    return FlatButton(
+      hoverColor: Colors.black38,
+      onPressed: () {
+        if (_showShortcutOverlay) {
+          if (_touchMode) {
+            _setDesktopMode();
+            showShortCutOverlay(message: 'Desktop mode enabled');
+          } else {
+            _setTouchMode();
+            showShortCutOverlay(message: 'Touch mode enabled');
+          }
+        } else {
+          if (_touchMode)
+            setDesktopMode();
+          else
+            setTouchMode();
+        }
+      },
+      child: SizedBox(
+        width: 20,
+        child: Center(
+          child: Icon(Icons.devices, color: Colors.white70),
+        ),
+      ),
     );
   }
 
   Positioned _showMenuOpen() {
     return Positioned(
       left: (116 * _activeIndex).toDouble(),
-      top: 30,
+      top: _currentMenuHeight,
       child: SizedBox(
-          height: (30 * widget.menuList[_activeIndex].menuListItems.length)
+          height: (_currentMenuHeight *
+                  widget.menuList[_activeIndex].menuListItems.length)
               .toDouble(),
           width: widget.menuList[_activeIndex].width,
           child: Container(
             color: Colors.blueGrey[700],
             child: ListView(
-              itemExtent: 30,
+              itemExtent: _currentMenuHeight,
               children: _buildItemList(),
             ),
           )),
@@ -814,7 +929,7 @@ class AppScreenState extends State<AppScreen> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Text(
-        shortcutLabel,
+        _shortcutLabel,
         style: TextStyle(color: Colors.blue, fontSize: 50),
       ),
     );
