@@ -12,8 +12,8 @@ The package gives you a desktop like experience on web (responsive to touch or d
 - [x] Keyboard shortcuts for menu items
 - [x] Master, detail views (Left pane, right pane)
 - [x] Pane sizes can be changed by user (or not - you choose).
-- [X] Context menu (right click) for Master, Detail and widgets
-- [ ] Upcomming: Longpress for contextmenu (for touch displays). Centered and animated
+- [x] Context menu (right click) for Master, Detail and widgets
+- [x] Upcomming: Longpress for contextmenu (for touch displays). Centered and animated
 - [ ] Choose between touch UI or desktop UI (can be change by user)
 - [ ] More predefined contextmenus to choose from
 - [ ] Flexible pane sizes as well as min/max sized
@@ -49,7 +49,11 @@ Nothing has to be changed.
 
 ## How to use
 
-You can access all variables and functions through the buildContext, and for your convenience we have made an extention for easy access: context.appScreen
+You can access all variables and functions through the buildContext, and for your convenience we have made an extention for easy access:
+
+```dart
+context.appScreen
+```
 
 the AppScreen has to be in a parent BuildContext (and not the current context). This is why panes has to be a Builder function and not just a Widget. To prevent you from making misconceptional errors.
 
@@ -67,15 +71,20 @@ See example.
 
 Programmably you can control:
 
-*context.appScreen.hideMenu()* - hides the menu from the screen. Keyboard shortcuts is still active
-*context.appScreen.showMenu()* - shows the menu on the screen
-*context.appScreen.openMenu()* - opens the active menuitem
-*context.appScreen.closeMenu()* - close a open menuitem (if any)
+```dart
+context.appScreen.hideMenu(); // hides the menu from the screen. Keyboard shortcuts is still active
+context.appScreen.showMenu(); // shows the menu on the screen
+context.appScreen.openMenu(); // opens the active menuitem
+context.appScreen.closeMenu(); // close a open menuitem (if any)
+```
+
 
 You have access to current variables:
 
-*context.appScreen.isMenuShown()* - returns true if menu is shown on Screen
-*context.appScreen.isMenuOpen()* - returns true if a MenuItem is shown on Screen
+```dart
+context.appScreen.isMenuShown(); // returns true if menu is shown on Screen
+context.appScreen.isMenuOpen();  // returns true if a MenuItem is shown on Screen
+```
 
 
 ## Keyboard shortcuts
@@ -94,8 +103,11 @@ Please notice that shift should only be used in combination with other system ke
 
 Overlay feature is disabled by default, but can be enabled programmably (se How-to-use section). This can be helpfull under development and as a feature making example videos.
 
-context.appScreen.showShortcutOverlay()  - 2 sec. text overlay will be shown
-context.appScreen.hideShortcutOverlay()  - No overlay will be shown
+```dart
+context.appScreen.showShortcutOverlay();  // 2 sec. text overlay will be shown
+context.appScreen.hideShortcutOverlay();  // No overlay will be shown
+```
+
 
 ## Master/ detail panes
 
@@ -139,13 +151,17 @@ class Detail {
 
 In compact mode you can change master/detail view:
 
-*context.appScreen.showOnlyMaster()*  change UI to show masterPane()
-*context.appScreen.showOnlyDetail()* change UI to show detailPane() 
+```dart
+context.appScreen.showOnlyMaster(); //  change UI to show masterPane()
+context.appScreen.showOnlyDetail(); // change UI to show detailPane() 
+```
 
-## Context menu (right click)
+
+## Context menu (right click or longpress)
 
 You can set different context menus for Master & Detail pane, and each individual Widget can have its own context menu.
 
+If contextmenu is activated by a longpress it will be centered and animated. If it is right clicked it will be top left position and no animation.
 
 ```dart
 AppScreen(
@@ -185,6 +201,3 @@ This will give you a small empty ContextMenu. You can use ContextMenuSliverItem 
 Please take a look at the example app for more examples.
 
 More prebuild ContextMenus will come. Feel free to build your own and contribute to the project.
-
-
-

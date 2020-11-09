@@ -7,9 +7,6 @@ import 'package:flutter_menu/flutter_menu.dart';
 
 import 'menu_model.dart';
 
-// Upcomming:
-// ContextPlacementCenter (enum: longPressOnly, never, always)
-// ContextPlacementKeepInPane (bool)
 /// extension for quick access to menu actions and informations
 extension BuildContextMenuFinder on BuildContext {
   AppScreenState get appScreen => AppScreen.of(this);
@@ -342,6 +339,7 @@ class AppScreenState extends State<AppScreen> {
   }
 
   bool _showContext = false;
+  bool _contextAnimation = false;
   Widget _currentContextMenu;
   double _currentContextDx;
   double _currentContextDy;
@@ -354,13 +352,16 @@ class AppScreenState extends State<AppScreen> {
       @required double menuWidth,
       @required double menuHeight,
       @required Offset offset,
-      @required Detail constraints}) {
+      @required Detail constraints,
+      @required bool centerContextMenu}) {
     if (menu != null) {
+      _contextAnimation = centerContextMenu; // If longpress we animate
       _calcContextMenuPosition(
           positionDx: offset.dx,
           positionDy: offset.dy,
           contextMenuSize: Size(menuWidth, menuHeight),
-          currentConstraints: constraints);
+          currentConstraints: constraints,
+          centerContextMenu: centerContextMenu);
       _currentContextWidth = menuWidth;
       _currentContextHeight = menuHeight;
 
@@ -378,7 +379,8 @@ class AppScreenState extends State<AppScreen> {
       {@required Offset offset,
       @required Widget menu,
       @required double width,
-      @required double height}) {
+      @required double height,
+      @required bool center}) {
     Detail currentConstraints;
     if (_isDesktop) {
       // desktop mode
@@ -394,48 +396,59 @@ class AppScreenState extends State<AppScreen> {
         currentConstraints = masterPaneDetails;
     }
     _setupContextMenu(
-        menu: menu,
-        offset: offset,
-        constraints: currentConstraints,
-        menuWidth: width,
-        menuHeight: height);
+      menu: menu,
+      offset: offset,
+      constraints: currentConstraints,
+      menuWidth: width,
+      menuHeight: height,
+      centerContextMenu: center,
+    );
   }
 
   /// Show ContextMenu for MasterPane or DetailPane
-  void _showMasterOrDetailPaneContextMenu({@required Offset offset}) {
+  void _showMasterOrDetailPaneContextMenu(
+      {@required Offset offset, @required bool center}) {
     if (_isDesktop) {
       // desktop mode
       if (offset.dx >= detailPaneDetails.minDx) {
         _setupContextMenu(
-            menu: widget.detailContextMenu.child,
-            menuWidth: widget.detailContextMenu.width,
-            menuHeight: widget.detailContextMenu.height,
-            offset: offset,
-            constraints: detailPaneDetails);
+          menu: widget.detailContextMenu.child,
+          menuWidth: widget.detailContextMenu.width,
+          menuHeight: widget.detailContextMenu.height,
+          offset: offset,
+          constraints: detailPaneDetails,
+          centerContextMenu: center,
+        );
       } else {
         _setupContextMenu(
-            menu: widget.masterContextMenu.child,
-            menuWidth: widget.masterContextMenu.width,
-            menuHeight: widget.masterContextMenu.height,
-            offset: offset,
-            constraints: masterPaneDetails);
+          menu: widget.masterContextMenu.child,
+          menuWidth: widget.masterContextMenu.width,
+          menuHeight: widget.masterContextMenu.height,
+          offset: offset,
+          constraints: masterPaneDetails,
+          centerContextMenu: center,
+        );
       }
     } else {
       // Compact mode
       if (_compactShowDetail) {
         _setupContextMenu(
-            menu: widget.detailContextMenu.child,
-            menuWidth: widget.detailContextMenu.width,
-            menuHeight: widget.detailContextMenu.height,
-            offset: offset,
-            constraints: detailPaneDetails);
+          menu: widget.detailContextMenu.child,
+          menuWidth: widget.detailContextMenu.width,
+          menuHeight: widget.detailContextMenu.height,
+          offset: offset,
+          constraints: detailPaneDetails,
+          centerContextMenu: center,
+        );
       } else {
         _setupContextMenu(
-            menu: widget.masterContextMenu.child,
-            menuWidth: widget.masterContextMenu.width,
-            menuHeight: widget.masterContextMenu.height,
-            offset: offset,
-            constraints: masterPaneDetails);
+          menu: widget.masterContextMenu.child,
+          menuWidth: widget.masterContextMenu.width,
+          menuHeight: widget.masterContextMenu.height,
+          offset: offset,
+          constraints: masterPaneDetails,
+          centerContextMenu: center,
+        );
       }
     }
   }
@@ -557,7 +570,9 @@ class AppScreenState extends State<AppScreen> {
 
           return GestureDetector(
             onLongPressStart: (details) {
-              print('Longpres Start: ${details.globalPosition}');
+              print('App Longpres Start: ${details.globalPosition}');
+              _showMasterOrDetailPaneContextMenu(
+                  offset: details.globalPosition, center: true);
             },
             child: RawKeyboardListener(
               focusNode: _focusNode,
@@ -609,7 +624,8 @@ class AppScreenState extends State<AppScreen> {
       onPointerDown: (event) {
         if (event.buttons == 2) {
           // right click
-          _showMasterOrDetailPaneContextMenu(offset: event.position);
+          _showMasterOrDetailPaneContextMenu(
+              offset: event.position, center: false);
         }
         if (event.buttons == 1) {
           // left click
@@ -633,20 +649,25 @@ class AppScreenState extends State<AppScreen> {
             child: child,
           );
         },
-        tween: Tween(begin: 0.0, end: 1.0),
-        child: Listener(
-            behavior: HitTestBehavior.opaque,
-            onPointerSignal: (event) {},
-            onPointerDown: (event) {
-              if (event.buttons == 2) // højre klik
-              {
-                hideContextMenu();
-              }
-            },
-            child: SizedBox(
-                height: _currentContextHeight,
-                width: _currentContextWidth,
-                child: _currentContextMenu)),
+        tween: Tween(begin: _contextAnimation ? 0.0 : 1.0, end: 1.0),
+        child: GestureDetector(
+          onLongPressStart: (details) {
+            // Do not open contextmenu inside contextmenu
+          },
+          child: Listener(
+              behavior: HitTestBehavior.opaque,
+              onPointerSignal: (event) {},
+              onPointerDown: (event) {
+                if (event.buttons == 2) // højre klik
+                {
+                  hideContextMenu();
+                }
+              },
+              child: SizedBox(
+                  height: _currentContextHeight,
+                  width: _currentContextWidth,
+                  child: _currentContextMenu)),
+        ),
       ),
     );
   }
@@ -763,6 +784,9 @@ class AppScreenState extends State<AppScreen> {
           ? SystemMouseCursors.resizeColumn
           : SystemMouseCursors.basic,
       child: GestureDetector(
+        onLongPressStart: (details) {
+          // Do nothing if user accidentially longpresses (do not open contextmenu)
+        },
         onPanUpdate: (details) {
           if (!widget.masterPaneFixedWidth)
             _setMasterPaneWidth(

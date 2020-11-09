@@ -22,20 +22,33 @@ class ContextMenuContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Listener(
-        behavior: HitTestBehavior.opaque,
-        onPointerDown: (event) {
-          if (event.buttons == 2) // right click
-          {
-            context.appScreen.showContextMenu(
-                offset: event.position,
-                menu: menu,
-                width: width,
-                height: height);
-          } else
-            context.appScreen.hideContextMenu();
+      child: GestureDetector(
+        onLongPressStart: (details) {
+          print(
+              'ContextMenuContainer Longpres Start: ${details.globalPosition}');
+          context.appScreen.showContextMenu(
+              offset: details.globalPosition,
+              menu: menu,
+              width: width,
+              height: height,
+              center: true);
         },
-        child: child,
+        child: Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerDown: (event) {
+            if (event.buttons == 2) // right click
+            {
+              context.appScreen.showContextMenu(
+                  offset: event.position,
+                  menu: menu,
+                  width: width,
+                  height: height,
+                  center: false);
+            } else
+              context.appScreen.hideContextMenu();
+          },
+          child: child,
+        ),
       ),
     );
   }

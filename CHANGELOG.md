@@ -1,6 +1,7 @@
-## [0.1.3] - 2020-11-?
+## [0.2.1] - 2020-11-09
 
-- BREAKING: Pane sizing has changed: You specifiy flex for Master and Detail and minimum sizes for Master and Detail.
+- BREAKING: Pane sizing has changed: You specifiy flex for Master and Detail and minimum sizes for Master and Detail. desktopBreakpoint has to be equal to or larger than min sizes for Master + Detail.
+- FEATURE: Longpress opens a centered and animated contextmenu (right click topleft positioned and no animation)
 
 ## [0.1.2] - 2020-11-07
 
