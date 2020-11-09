@@ -2,6 +2,8 @@
 
 - CHANGE: ResizeBarHelper only in touchMode
 - CHANGE: Options to set touchMenuBar and desktopMenuBar height in AppScreen()
+- CHANGE: Bigger textsize in touchmode
+
 
 ## [0.2.2] - 2020-11-09
 
