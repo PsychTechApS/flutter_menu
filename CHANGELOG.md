@@ -2,6 +2,7 @@
 
 - FEATURE: New ResizeBar() to customize the look of the resizeBar. Touch screens can now use the circular helper to move it around
            use leftColor and RightColor to get at default BoxDecoration or customize with decoration and helperDecoration.
+- FEATURE: First version of touch mode. Get a larger menu for easy touch screen use.
 
 ## [0.2.1] - 2020-11-09
 
