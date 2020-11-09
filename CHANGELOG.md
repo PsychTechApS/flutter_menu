@@ -1,3 +1,8 @@
+## [0.2.3] - 2020-11-09
+
+- CHANGE: ResizeBarHelper only in touchMode
+- CHANGE: Options to set touchMenuBar and desktopMenuBar height in AppScreen()
+
 ## [0.2.2] - 2020-11-09
 
 - FEATURE: New ResizeBar() to customize the look of the resizeBar. Touch screens can now use the circular helper to move it around

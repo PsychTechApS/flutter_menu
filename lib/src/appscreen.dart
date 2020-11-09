@@ -39,6 +39,8 @@ class AppScreen extends StatefulWidget {
   final ContextMenu detailContextMenu;
 
   final bool touchMode;
+  final double touchMenuBarHeight;
+  final double dekstopMenuBarHeight;
 
   const AppScreen({
     Key key,
@@ -61,10 +63,14 @@ class AppScreen extends StatefulWidget {
     this.masterContextMenu,
     this.detailContextMenu,
     this.touchMode = false,
+    this.touchMenuBarHeight = 40,
+    this.dekstopMenuBarHeight = 30,
   })  : assert(menuList != null, "menuList is missing!"),
         assert(masterPane != null, "masterPane is missing!"),
         assert((masterPaneMinWidth + detailPaneMinWidth) <= desktopBreakpoint,
             "Master + Detail min Width has to be less than desktopbreakpoint !"),
+        assert(dekstopMenuBarHeight >= 25, "Too small for UI to look good!"),
+        assert(touchMenuBarHeight >= 40, "Too small for UI to look good!"),
         super(key: key);
 
   static AppScreenState of(BuildContext context) {
@@ -138,8 +144,6 @@ class AppScreenState extends State<AppScreen> {
     }
   }
 
-  final double kMenuBarHeight = 30;
-  final double kMenuTouchBarHeight = 40;
   double _currentMenuHeight;
 
   Detail _masterPaneDetails = Detail();
@@ -597,7 +601,7 @@ class AppScreenState extends State<AppScreen> {
 
   void _setTouchMode() {
     _touchMode = true;
-    _currentMenuHeight = kMenuTouchBarHeight;
+    _currentMenuHeight = widget.touchMenuBarHeight;
   }
 
   /// activate touch mode
@@ -609,7 +613,7 @@ class AppScreenState extends State<AppScreen> {
 
   void _setDesktopMode() {
     _touchMode = false;
-    _currentMenuHeight = kMenuBarHeight;
+    _currentMenuHeight = widget.dekstopMenuBarHeight;
   }
 
   /// activate desktop mode
@@ -675,7 +679,7 @@ class AppScreenState extends State<AppScreen> {
           // mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_menuIsShown && !_touchMode) _menuBar(),
+            if (_menuIsShown && !_touchMode) _desktopMenuBar(),
             if (_menuIsShown && _touchMode) _menuTouchBar(),
             Row(
               children: [
@@ -691,7 +695,8 @@ class AppScreenState extends State<AppScreen> {
             ),
           ],
         ),
-        if (widget.detailPane != null) _resizeBarIcon(constraints),
+        if (widget.detailPane != null && _touchMode == true)
+          _resizeBarIcon(constraints),
         _listenForAppClick(),
         if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
@@ -790,7 +795,7 @@ class AppScreenState extends State<AppScreen> {
           // mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_menuIsShown && !_touchMode) _menuBar(),
+            if (_menuIsShown && !_touchMode) _desktopMenuBar(),
             if (_menuIsShown && _touchMode) _menuTouchBar(),
             Row(
               children: [
@@ -812,7 +817,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  SizedBox _menuBar() {
+  SizedBox _desktopMenuBar() {
     return SizedBox(
       height: _currentMenuHeight,
       width: double.infinity,
@@ -883,14 +888,6 @@ class AppScreenState extends State<AppScreen> {
       hoverColor: Colors.black38,
       onPressed: () {
         if (_showShortcutOverlay) {
-          if (_touchMode) {
-            _setDesktopMode();
-            showShortCutOverlay(message: 'Desktop mode enabled');
-          } else {
-            _setTouchMode();
-            showShortCutOverlay(message: 'Touch mode enabled');
-          }
-        } else {
           if (_touchMode)
             setDesktopMode();
           else
@@ -898,7 +895,7 @@ class AppScreenState extends State<AppScreen> {
         }
       },
       child: SizedBox(
-        width: 20,
+        width: 25,
         child: Center(
           child: Icon(Icons.devices, color: Colors.white70),
         ),
@@ -1003,12 +1000,15 @@ class AppScreenState extends State<AppScreen> {
                         child: SizedBox(
                             width: 20,
                             child: Icon(listItem.icon,
-                                size: 12, color: Colors.white))),
+                                size: _touchMode ? 16 : 12,
+                                color: Colors.white))),
                   if (listItem.icon == null) SizedBox(width: 20),
                   Padding(
                     padding: const EdgeInsets.only(left: 6.0),
                     child: Text(listItem.title,
-                        style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: _touchMode ? 16 : 12)),
                   ),
                   if (listItem.shortcut != null)
                     Expanded(
@@ -1062,8 +1062,9 @@ class AppScreenState extends State<AppScreen> {
                 width: 100,
                 child: Center(
                     child: Text(widget.menuList[i].title,
-                        style:
-                            TextStyle(color: Colors.white70, fontSize: 12)))),
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: _touchMode ? 16 : 12)))),
           ),
         ));
     }

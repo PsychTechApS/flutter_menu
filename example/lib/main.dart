@@ -214,9 +214,10 @@ class _ScreenState extends State<Screen> {
                   height: 300,
                   child: Container(
                     color: Colors.blueGrey,
-                    child: Align(
-                        alignment: Alignment.center,
-                        child: Text(_message, style: TextStyle(fontSize: 40))),
+                    child: Center(
+                        child: Text(_message,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 40))),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -294,10 +295,12 @@ class _ScreenState extends State<Screen> {
                     height: 300,
                     child: Container(
                       color: Colors.blueGrey,
-                      child: Align(
-                          alignment: Alignment.center,
-                          child: Text('Right click Me',
-                              style: TextStyle(fontSize: 30))),
+                      child: Center(
+                        child: Text('Right click or longpress me',
+                            textAlign: TextAlign.center,
+                            softWrap: true,
+                            style: TextStyle(fontSize: 30)),
+                      ),
                     ),
                   ),
                 ),
