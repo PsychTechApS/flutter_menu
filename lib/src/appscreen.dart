@@ -9,7 +9,7 @@ import 'package:flutter_menu/flutter_menu.dart';
 import 'menu_model.dart';
 
 // Upcomming changes:
-// TODO: MENU should be a list view so it will not overflow
+// TODO: MENU should not overflow
 // TODO: Autosizing
 
 extension BuildContextMenuFinder on BuildContext {
@@ -187,8 +187,6 @@ class AppScreenState extends State<AppScreen> {
   }
 
   void _setLargeDrawer() {
-    print('LARGE DRAWER');
-
     _smallDrawer = false;
     _drawerWidth = widget.drawer.largeDrawerWidth;
   }
@@ -204,7 +202,6 @@ class AppScreenState extends State<AppScreen> {
   }
 
   void _setSmallDrawer() {
-    print('SMALL DRAWER');
     _smallDrawer = true;
     _drawerWidth = widget.drawer.smallDrawerWidth;
   }
@@ -238,12 +235,9 @@ class AppScreenState extends State<AppScreen> {
     _drawerWidth = 0;
 
     if (widget.drawer.smallDrawer != null && _smallDrawer == true) {
-      print('SmallDrawer set');
       _setSmallDrawer();
       _drawerEnabled = true;
     } else if (widget.drawer.largeDrawer != null && _smallDrawer == false) {
-      print('LargeDrawer set');
-
       _setLargeDrawer();
       _drawerEnabled = true;
     }
@@ -363,43 +357,6 @@ class AppScreenState extends State<AppScreen> {
         _masterPaneWidth = _newMasterPaneWidth;
       setState(() {});
     }
-
-    // if (_masterPaneWidth > _minMasterPaneWidth && _masterPaneWidth < _maxMasterPaneWidth) {
-    //   if (width < _minMasterPaneWidth)
-    //     _masterPaneWidth = _minMasterPaneWidth;
-    //   else if (width > _maxMasterPaneWidth)
-    //     _masterPaneWidth = _maxMasterPaneWidth;
-    //   else
-    //     _masterPaneWidth = width;
-    //   setState(() {});
-    // }
-
-    // print('Screen: ${constraints.maxWidth}');
-    // double _minMasterPaneWidth = constraints.maxWidth /
-    //     (masterPaneMinFlex + detailPaneMinFlex) *
-    //     masterPaneMinFlex;
-    // print('MinMaster: $_minMasterPaneWidth');
-    // double _maxMasterPaneWidth = constraints.maxWidth /
-    //     (masterPaneMaxFlex + detailPaneMaxFlex) *
-    //     masterPaneMaxFlex;
-    // print('MaxMaster: $_maxMasterPaneWidth');
-
-    // if (width < widget.masterPaneMinWidth)
-    //   _masterPaneWidth = widget.masterPaneMinWidth;
-    // else if (width > widget.masterPaneMaxWidth)
-    //   _masterPaneWidth = widget.masterPaneMaxWidth;
-    // else
-    //   _masterPaneWidth = width;
-
-    // if (width < _minMasterPaneWidth)
-    //   _masterPaneWidth = _minMasterPaneWidth;
-    // else if (width > _maxMasterPaneWidth)
-    //   _masterPaneWidth = _maxMasterPaneWidth;
-    // else
-    //   _masterPaneWidth = width;
-
-    print(
-        'PANE NEW ($panDx) : Master(${_masterPaneDetails.width}) : DETAIL(${_detailPaneDetails.width})');
   }
 
   bool _isDesktop = true;
@@ -750,7 +707,6 @@ class AppScreenState extends State<AppScreen> {
 
           return GestureDetector(
             onLongPressStart: (details) {
-              print('App Longpres Start: ${details.globalPosition}');
               _showMasterOrDetailPaneContextMenu(
                   offset: details.globalPosition, center: true);
             },
@@ -858,7 +814,6 @@ class AppScreenState extends State<AppScreen> {
 
   _onDrawerDrag({@required double delta}) {
     _drawerDragDelta = delta;
-    print(delta);
   }
 
   _onDrawerDragEnd() {

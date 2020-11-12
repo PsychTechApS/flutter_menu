@@ -24,8 +24,6 @@ class ContextMenuContainer extends StatelessWidget {
     return Center(
       child: GestureDetector(
         onLongPressStart: (details) {
-          print(
-              'ContextMenuContainer Longpres Start: ${details.globalPosition}');
           context.appScreen.showContextMenu(
               offset: details.globalPosition,
               menu: menu,
