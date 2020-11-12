@@ -8,11 +8,9 @@ import 'package:flutter_menu/flutter_menu.dart';
 
 import 'menu_model.dart';
 
-// Drawer is not shown correctly
-// size of drawerIcon
-// How to choose small or Large drawer - autochange or userchange or both?
-// MENU should be a list view so it will not overflow
-// Drawer pan size change on touch
+// Upcomming changes:
+// TODO: MENU should be a list view so it will not overflow
+// TODO: Autosizing
 
 extension BuildContextMenuFinder on BuildContext {
   AppScreenState get appScreen => AppScreen.of(this);
@@ -59,10 +57,10 @@ class AppScreen extends StatefulWidget {
     this.detailPane,
     this.masterPaneFlex = 1,
     this.detailPaneFlex = 1,
-    this.masterPaneMinWidth = 600,
-    this.detailPaneMinWidth = 600,
+    this.masterPaneMinWidth = 500,
+    this.detailPaneMinWidth = 500,
     this.masterPaneFixedWidth = false,
-    this.desktopBreakpoint = 1200,
+    this.desktopBreakpoint = 1100,
     this.onBreakpointChange,
     this.resizeBar,
     this.drawer = const AppDrawer(),
@@ -798,14 +796,46 @@ class AppScreenState extends State<AppScreen> {
           _resizeBarIcon(constraints),
         _listenForAppClick(),
         if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
-        if (!_drawerOpen) _edgeDragOpen(),
+        if (_drawerEnabled &&
+            !_drawerOpen &&
+            widget.drawer.edgeDragOpenWidth > 0)
+          _edgeDragOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
         if (_showShortcutOverlay && _shortcutLabel != null) _shortcutOverlay(),
       ],
     );
   }
 
-  double _edgeDragOpenWidth = 20;
+  Stack _compactView(BoxConstraints constraints) {
+    return Stack(
+      children: [
+        Column(
+          // mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_menuIsShown && !_touchMode) _desktopMenuBar(),
+            if (_menuIsShown && _touchMode) _menuTouchBar(),
+            Row(
+              children: [
+                if (!_compactShowDetail) _masterPane(),
+                if (_compactShowDetail && widget.detailPane != null)
+                  SizedBox(
+                      height: _detailPaneDetails.height,
+                      width: constraints.maxWidth,
+                      child: _detailPane()),
+              ],
+            ),
+          ],
+        ),
+        _listenForAppClick(),
+        if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
+        if (_showContext && _currentContextMenu != null) _showContextMenu(),
+        if (_showShortcutOverlay && _shortcutLabel != null) _shortcutOverlay(),
+        if (_drawerOpen && _drawerEnabled) _showDrawer(),
+      ],
+    );
+  }
+
   Widget _edgeDragOpen() {
     return Positioned(
       top: _masterPaneDetails.minDy,
@@ -817,9 +847,9 @@ class AppScreenState extends State<AppScreen> {
           _onDrawerDragEnd();
         },
         child: SizedBox(
-            width: _edgeDragOpenWidth,
+            width: widget.drawer.edgeDragOpenWidth,
             height: _masterPaneDetails.height,
-            child: Container(color: Colors.red)),
+            child: Container(color: Colors.transparent)),
       ),
     );
   }
@@ -852,20 +882,23 @@ class AppScreenState extends State<AppScreen> {
   }
 
   Widget _showDrawer() {
-    return GestureDetector(
-      onLongPressStart: (details) {
-        // Do nothing if user accidentially longpresses (do not open contextmenu)
-      },
-      onHorizontalDragUpdate: (details) {
-        _onDrawerDrag(delta: details.delta.dx);
-      },
-      onHorizontalDragEnd: (_) {
-        _onDrawerDragEnd();
-      },
-      child: Container(
-        width: _drawerWidth,
-        height: _masterPaneDetails.height,
-        child: _getActiveDrawer(),
+    return Positioned(
+      top: _masterPaneDetails.minDy,
+      child: GestureDetector(
+        onLongPressStart: (details) {
+          // Do nothing if user accidentially longpresses (do not open contextmenu)
+        },
+        onHorizontalDragUpdate: (details) {
+          _onDrawerDrag(delta: details.delta.dx);
+        },
+        onHorizontalDragEnd: (_) {
+          _onDrawerDragEnd();
+        },
+        child: Container(
+          width: _drawerWidth,
+          height: _masterPaneDetails.height,
+          child: _getActiveDrawer(),
+        ),
       ),
     );
   }
@@ -950,35 +983,6 @@ class AppScreenState extends State<AppScreen> {
                   child: _currentContextMenu)),
         ),
       ),
-    );
-  }
-
-  Stack _compactView(BoxConstraints constraints) {
-    return Stack(
-      children: [
-        Column(
-          // mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_menuIsShown && !_touchMode) _desktopMenuBar(),
-            if (_menuIsShown && _touchMode) _menuTouchBar(),
-            Row(
-              children: [
-                if (!_compactShowDetail) _masterPane(),
-                if (_compactShowDetail && widget.detailPane != null)
-                  SizedBox(
-                      height: _detailPaneDetails.height,
-                      width: constraints.maxWidth,
-                      child: _detailPane()),
-              ],
-            ),
-          ],
-        ),
-        _listenForAppClick(),
-        if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
-        if (_showContext && _currentContextMenu != null) _showContextMenu(),
-        if (_showShortcutOverlay && _shortcutLabel != null) _shortcutOverlay(),
-      ],
     );
   }
 
@@ -1097,23 +1101,8 @@ class AppScreenState extends State<AppScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: FlatButton(
-              hoverColor: Colors.black38,
-              onPressed: () {
-                if (_drawerOpen)
-                  closeDrawer();
-                else {
-                  openDrawer();
-                }
-              },
-              child: Center(
-                child: Icon(_drawerOpen ? Icons.menu_open : Icons.menu,
-                    color: Colors.white70, size: _drawerWidth < 40 ? 16 : 18),
-              ),
-            ),
-          ),
-          Expanded(
+          SizedBox(
+            width: 70,
             child: FlatButton(
               hoverColor: Colors.black38,
               onPressed: () {
@@ -1129,7 +1118,7 @@ class AppScreenState extends State<AppScreen> {
                 }
               },
               child: Center(
-                child: Icon(Icons.switch_left_rounded,
+                child: Icon(Icons.menu,
                     color: Colors.white70, size: _drawerWidth < 40 ? 16 : 18),
               ),
             ),

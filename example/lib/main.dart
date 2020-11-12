@@ -145,15 +145,7 @@ class _ScreenState extends State<Screen> {
         drawer: AppDrawer(
           defaultSmall: false,
           largeDrawerWidth: 200,
-          largeDrawer: Container(
-              color: Colors.amber,
-              child: ListView(
-                children: [
-                  ListTile(
-                    title: Text('LargeDrawer'),
-                  ),
-                ],
-              )),
+          largeDrawer: smallDrawer(),
           smallDrawerWidth: 60,
           smallDrawer: Container(
               color: Colors.amber,
@@ -175,6 +167,18 @@ class _ScreenState extends State<Screen> {
             rightColor: detailBackgroundColor),
       ),
     );
+  }
+
+  Widget smallDrawer() {
+    return Container(
+        color: Colors.amber,
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text('LargeDrawer'),
+            ),
+          ],
+        ));
   }
 
   Builder detailPane() {

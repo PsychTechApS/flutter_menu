@@ -15,15 +15,15 @@ The package gives you a desktop like experience on web (responsive to touch or d
 - [x] Context menu (right click) for Master, Detail and widgets
 - [x] Longpress for contextmenu (for touch displays). Centered and animated
 - [x] Choose between touch UI or desktop UI (can be change by user)
+- [x] Drawer (small or large)
+- [x] Pane sizes is set by a flex factor for the UI to stay nice and responsive.
+
 - [ ] More predefined contextmenus to choose from
-- [ ] Flexible pane sizes as well as min/max sized
 - [ ] Scrollbar
-- [ ] More panes (drawer, maybe a 4th pane)
 - [ ] More callbacks on change
 - [ ] Extra topbar to be used as toolbar or information bar
 - [ ] Fullscreen dialogs
 - [ ] different menu in compact mode
-- [ ] Two different menulayouts: desktop or tablet
 
 All siblings down the widget tree has access to the AppScreen functionality.
  
@@ -116,10 +116,17 @@ If you set both Master and detail panes default behavior will be give the user c
 
 In AppScreen() you can set:
 
-*detailFixedWidth (default=false)* if true detailPane width is fixed to *detailWidth*
-*detailWidth* this is the start value (and permanent value if detailFixedWidth==true)
-*detailMinWidth* Minium width
-*detailMaxWidth* Maximum width
+```dart
+  final double masterPaneFlex;      // default=1
+  final double detailPaneFlex;      // default=1
+  final double masterPaneMinWidth;  // default= 500
+  final double detailPaneMinWidth;  // default = 500
+```
+
+The flex sizing is just as in the Expanded() widget. You set the relative size, as for the UI to stay responsive when window size changes. The UI updates with respect for the minimum sizes, and if the detailPane can not stay on screen, only master will be shown.
+
+The user can change the sizes of the master and detail panes, if this is possible within the minium size boundaries.
+
 
 The Master/detail panes are responsive, and you can set the breakpoint:
 
@@ -156,6 +163,29 @@ context.appScreen.showOnlyMaster(); //  change UI to show masterPane()
 context.appScreen.showOnlyDetail(); // change UI to show detailPane() 
 ```
 
+## Drawer
+
+The AppScreen has its own drawer, just as the Scaffold() has.
+
+You can choose set only one size of drawer or you can have to different sizes for the user to choose.
+
+```dart
+class AppDrawer {
+  final double smallDrawerWidth;
+  final Widget smallDrawer;
+  final double largeDrawerWidth;
+  final Widget largeDrawer;
+  final bool showOnDesktop;
+  final bool defaultSmall;
+  final bool autoSizing;            // autoSizing is not yet implemented.
+  final double edgeDragOpenWidth;
+}
+```
+*default small* if true Drawer opens with the small drawer on start.
+
+*showOnDesktop* if true Drawer will be shown automaticly on Desktop is AppScreen is big enough.
+
+*edgeDragOpenWith* is for touch users to slide the drawer open. It indicates the zone where dragging is registred. On mobile devices it is set to 20 in the Drawer() of Scaffold(). But in browsers run on mobile devices there can be a sliding function the change webpage. The zone has been made bigger to adjust for this. You might change it according to your needs. If set to 0 drag to Open Drawer will be disabled.
 
 ## Context menu (right click or longpress)
 
@@ -201,3 +231,4 @@ This will give you a small empty ContextMenu. You can use ContextMenuSliverItem 
 Please take a look at the example app for more examples.
 
 More prebuild ContextMenus will come. Feel free to build your own and contribute to the project.
+
