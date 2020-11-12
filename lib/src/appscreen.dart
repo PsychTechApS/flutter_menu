@@ -8,6 +8,12 @@ import 'package:flutter_menu/flutter_menu.dart';
 
 import 'menu_model.dart';
 
+// Drawer is not shown correctly
+// size of drawerIcon
+// How to choose small or Large drawer - autochange or userchange or both?
+// MENU should be a list view so it will not overflow
+// Drawer pan size change on touch
+
 extension BuildContextMenuFinder on BuildContext {
   AppScreenState get appScreen => AppScreen.of(this);
 }
@@ -30,6 +36,8 @@ class AppScreen extends StatefulWidget {
   final Function onBreakpointChange;
 
   final ResizeBar resizeBar;
+
+  final AppDrawer drawer;
 
   final Builder drawerPane;
   final Widget leading;
@@ -57,6 +65,7 @@ class AppScreen extends StatefulWidget {
     this.desktopBreakpoint = 1200,
     this.onBreakpointChange,
     this.resizeBar,
+    this.drawer = const AppDrawer(),
     this.drawerPane,
     this.leading,
     this.trailing,
@@ -163,8 +172,94 @@ class AppScreenState extends State<AppScreen> {
 
   double _masterPaneWidth;
 
-  bool _drawerIsShown = false; // TODO: implement drawer
-  double _drawerWidth = 0; // TODO: implement drawer
+  bool _drawerOpen = false;
+  bool _drawerEnabled = false;
+  bool _smallDrawer = false;
+  double _drawerWidth = 0;
+
+  /// Drawer will be set to large. If shown UI will update
+  void setLargeDrawer() {
+    if (_drawerEnabled && widget.drawer.largeDrawer != null) {
+      _setLargeDrawer();
+
+      if (_drawerOpen) {
+        setState(() {});
+      }
+    }
+  }
+
+  void _setLargeDrawer() {
+    print('LARGE DRAWER');
+
+    _smallDrawer = false;
+    _drawerWidth = widget.drawer.largeDrawerWidth;
+  }
+
+  /// Drawer will be set to small. If shown UI will update
+  void setSmallDrawer() {
+    if (_drawerEnabled && widget.drawer.smallDrawer != null) {
+      _setSmallDrawer();
+      if (_drawerOpen) {
+        setState(() {});
+      }
+    }
+  }
+
+  void _setSmallDrawer() {
+    print('SMALL DRAWER');
+    _smallDrawer = true;
+    _drawerWidth = widget.drawer.smallDrawerWidth;
+  }
+
+  /// Drawer will be closed
+  void closeDrawer() {
+    if (_drawerEnabled) {
+      if (_drawerOpen) {
+        setState(() {
+          _drawerOpen = false;
+        });
+      }
+    }
+  }
+
+  /// Drawer will be opened
+  void openDrawer() {
+    if (_drawerEnabled) {
+      if (!_drawerOpen) {
+        setState(() {
+          _drawerOpen = true;
+        });
+      }
+    }
+  }
+
+  void _setupDrawer() {
+    _drawerOpen = false;
+    _drawerEnabled = false;
+    _smallDrawer = widget.drawer.defaultSmall;
+    _drawerWidth = 0;
+
+    if (widget.drawer.smallDrawer != null && _smallDrawer == true) {
+      print('SmallDrawer set');
+      _setSmallDrawer();
+      _drawerEnabled = true;
+    } else if (widget.drawer.largeDrawer != null && _smallDrawer == false) {
+      print('LargeDrawer set');
+
+      _setLargeDrawer();
+      _drawerEnabled = true;
+    }
+    if (_isDesktop && widget.drawer.showOnDesktop) _drawerOpen = true;
+  }
+
+  /// returns null if no drawer is to be shown
+  Widget _getActiveDrawer() {
+    if (!_drawerOpen) return null;
+    if (!_drawerEnabled) return null;
+
+    if (_smallDrawer) return widget.drawer.smallDrawer; // can be null
+    return widget.drawer.largeDrawer; // can be null;
+  }
 
   void _calcScreenAndPaneSize(BoxConstraints constraints) {
     // Calc screen sized
@@ -192,7 +287,7 @@ class AppScreenState extends State<AppScreen> {
     {
       // we have desktop view with master AND detail
       // remember the slider width if shown
-      _masterPaneDetails.minDx = _drawerIsShown ? _drawerWidth : 0;
+      _masterPaneDetails.minDx = _drawerOpen ? _drawerWidth : 0;
       _masterPaneDetails.maxDx = _masterPaneDetails.minDx + _masterPaneWidth;
       _detailPaneDetails.minDx = _masterPaneDetails.maxDx + _resizeBar.width;
       _detailPaneDetails.maxDx = constraints.maxWidth;
@@ -225,7 +320,7 @@ class AppScreenState extends State<AppScreen> {
   void _handleConstraintChange(BoxConstraints constraints) {
     if (constraints.maxHeight != _lastScreenHeight ||
         constraints.maxWidth != _lastScreenWidth) {
-      _calcFlexWidth(maxWidth: constraints.maxWidth);
+      _calcPaneFlexWidth(screenWidth: constraints.maxWidth);
       _showContext = false;
       _lastScreenHeight = constraints.maxHeight;
       _lastScreenWidth = constraints.maxWidth;
@@ -241,31 +336,33 @@ class AppScreenState extends State<AppScreen> {
 
   double _maxMasterPaneWidth; // Used to keep resizebar within boundaries
 
-  void _calcFlexWidth({double maxWidth}) {
+  void _calcPaneFlexWidth({double screenWidth}) {
+    double _availableWidth = screenWidth - (_drawerOpen ? _drawerWidth : 0);
     double screenFlex = widget.masterPaneFlex + widget.detailPaneFlex;
-    _masterPaneWidth = maxWidth / screenFlex * widget.masterPaneFlex;
+    _masterPaneWidth = _availableWidth / screenFlex * widget.masterPaneFlex;
     // TODO: TJEK DENNE BEREGNING VED ÆNDRING I WIDTH:
     _maxMasterPaneWidth =
-        maxWidth - widget.detailPaneMinWidth - _resizeBar.width;
+        _availableWidth - widget.detailPaneMinWidth - _resizeBar.width;
     if (_masterPaneWidth < widget.masterPaneMinWidth)
       _masterPaneWidth = widget.masterPaneMinWidth;
     else if (_masterPaneWidth > _maxMasterPaneWidth)
       _masterPaneWidth = _maxMasterPaneWidth;
   }
 
-  void _setMasterPaneWidth(
-      {@required double width, @required BoxConstraints constraints}) {
+  void _setMasterPaneWidthOnPan(
+      {@required double panDx, @required BoxConstraints constraints}) {
+    double _newMasterPaneWidth = panDx - (_drawerOpen ? _drawerWidth : 0);
     if (_maxMasterPaneWidth < widget.masterPaneMinWidth)
       _maxMasterPaneWidth = widget.masterPaneMinWidth;
-    _calcFlexWidth(maxWidth: constraints.maxWidth);
+    _calcPaneFlexWidth(screenWidth: constraints.maxWidth);
 
     if (_masterPaneWidth > widget.masterPaneMinWidth) {
-      if (width < widget.masterPaneMinWidth)
+      if (_newMasterPaneWidth < widget.masterPaneMinWidth)
         _masterPaneWidth = widget.masterPaneMinWidth;
-      else if (width > _maxMasterPaneWidth)
+      else if (_newMasterPaneWidth > _maxMasterPaneWidth)
         _masterPaneWidth = _maxMasterPaneWidth;
       else
-        _masterPaneWidth = width;
+        _masterPaneWidth = _newMasterPaneWidth;
       setState(() {});
     }
 
@@ -304,7 +401,7 @@ class AppScreenState extends State<AppScreen> {
     //   _masterPaneWidth = width;
 
     print(
-        'PANE NEW ($width) : Master(${_masterPaneDetails.width}) : DETAIL(${_detailPaneDetails.width})');
+        'PANE NEW ($panDx) : Master(${_masterPaneDetails.width}) : DETAIL(${_detailPaneDetails.width})');
   }
 
   bool _isDesktop = true;
@@ -634,6 +731,7 @@ class AppScreenState extends State<AppScreen> {
   @override
   void initState() {
     _setupResizeBar();
+    _setupDrawer();
     _setupMenu();
     if (widget.masterContextMenu != null)
       _currentContextMenu = widget.masterContextMenu.child;
@@ -683,6 +781,7 @@ class AppScreenState extends State<AppScreen> {
             if (_menuIsShown && _touchMode) _menuTouchBar(),
             Row(
               children: [
+                if (_drawerOpen && _drawerEnabled) _showDrawer(),
                 _masterPane(),
                 if (widget.detailPane != null)
                   Row(
@@ -699,9 +798,75 @@ class AppScreenState extends State<AppScreen> {
           _resizeBarIcon(constraints),
         _listenForAppClick(),
         if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
+        if (!_drawerOpen) _edgeDragOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
         if (_showShortcutOverlay && _shortcutLabel != null) _shortcutOverlay(),
       ],
+    );
+  }
+
+  double _edgeDragOpenWidth = 20;
+  Widget _edgeDragOpen() {
+    return Positioned(
+      top: _masterPaneDetails.minDy,
+      child: GestureDetector(
+        onHorizontalDragUpdate: (details) {
+          _onDrawerDrag(delta: details.delta.dx);
+        },
+        onHorizontalDragEnd: (_) {
+          _onDrawerDragEnd();
+        },
+        child: SizedBox(
+            width: _edgeDragOpenWidth,
+            height: _masterPaneDetails.height,
+            child: Container(color: Colors.red)),
+      ),
+    );
+  }
+
+  double _drawerDragDelta;
+
+  _onDrawerDrag({@required double delta}) {
+    _drawerDragDelta = delta;
+    print(delta);
+  }
+
+  _onDrawerDragEnd() {
+    if (_drawerDragDelta != null && _drawerOpen) {
+      if (_smallDrawer) {
+        if (_drawerDragDelta < 0)
+          closeDrawer();
+        else
+          setLargeDrawer();
+      } else {
+        if (_drawerDragDelta > 0) //
+        {
+          // Do nothing - drawer cannot be bigger
+        } else
+          setSmallDrawer();
+      }
+    } else {
+      openDrawer();
+    }
+    _drawerDragDelta = null;
+  }
+
+  Widget _showDrawer() {
+    return GestureDetector(
+      onLongPressStart: (details) {
+        // Do nothing if user accidentially longpresses (do not open contextmenu)
+      },
+      onHorizontalDragUpdate: (details) {
+        _onDrawerDrag(delta: details.delta.dx);
+      },
+      onHorizontalDragEnd: (_) {
+        _onDrawerDragEnd();
+      },
+      child: Container(
+        width: _drawerWidth,
+        height: _masterPaneDetails.height,
+        child: _getActiveDrawer(),
+      ),
     );
   }
 
@@ -717,8 +882,8 @@ class AppScreenState extends State<AppScreen> {
           },
           onPanUpdate: (details) {
             if (!widget.masterPaneFixedWidth)
-              _setMasterPaneWidth(
-                  width: details.globalPosition.dx, constraints: constraints);
+              _setMasterPaneWidthOnPan(
+                  panDx: details.globalPosition.dx, constraints: constraints);
           },
           child: SizedBox(
             width: _resizeBar.helperSize,
@@ -817,69 +982,83 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  SizedBox _desktopMenuBar() {
-    return SizedBox(
-      height: _currentMenuHeight,
-      width: double.infinity,
-      child: Container(
-          color: Colors.blueGrey,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (widget.leading != null)
-                Row(
-                  children: [
-                    widget.leading,
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4, right: 4),
-                      child: SizedBox(
-                          width: 2,
-                          child: Container(color: Colors.blueGrey[100])),
-                    ),
-                  ],
-                ),
-              if (widget.menuList != null)
-                Row(
-                  children: _buildMenuList(),
-                ),
-              Expanded(
-                  child: Align(
-                      alignment: Alignment.centerRight, child: _touchButton())),
-            ],
-          )),
+  Widget _desktopMenuBar() {
+    return GestureDetector(
+      onLongPress: () {
+        // Do nothing if user accidentially presses longpress in the menu
+      },
+      child: SizedBox(
+        height: _currentMenuHeight,
+        width: double.infinity,
+        child: Container(
+            color: Colors.blueGrey,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (_drawerEnabled) _drawerButton(),
+                if (widget.leading != null)
+                  Row(
+                    children: [
+                      widget.leading,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4, right: 4),
+                        child: SizedBox(
+                            width: 2,
+                            child: Container(color: Colors.blueGrey[100])),
+                      ),
+                    ],
+                  ),
+                if (widget.menuList != null)
+                  Row(
+                    children: _buildMenuList(),
+                  ),
+                Expanded(
+                    child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _touchButton())),
+              ],
+            )),
+      ),
     );
   }
 
-  SizedBox _menuTouchBar() {
-    return SizedBox(
-      height: _currentMenuHeight,
-      width: double.infinity,
-      child: Container(
-          color: Colors.blueGrey,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (widget.leading != null)
-                Row(
-                  children: [
-                    widget.leading,
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4, right: 4),
-                      child: SizedBox(
-                          width: 2,
-                          child: Container(color: Colors.blueGrey[100])),
-                    ),
-                  ],
-                ),
-              if (widget.menuList != null)
-                Row(
-                  children: _buildMenuList(),
-                ),
-              Expanded(
-                  child: Align(
-                      alignment: Alignment.centerRight, child: _touchButton())),
-            ],
-          )),
+  Widget _menuTouchBar() {
+    return GestureDetector(
+      onLongPress: () {
+        // Do nothing if user accidentially presses longpress in the menu
+      },
+      child: SizedBox(
+        height: _currentMenuHeight,
+        width: double.infinity,
+        child: Container(
+            color: Colors.blueGrey,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (_drawerEnabled) _drawerButton(),
+                if (widget.leading != null)
+                  Row(
+                    children: [
+                      widget.leading,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4, right: 4),
+                        child: SizedBox(
+                            width: 2,
+                            child: Container(color: Colors.blueGrey[100])),
+                      ),
+                    ],
+                  ),
+                if (widget.menuList != null)
+                  Row(
+                    children: _buildMenuList(),
+                  ),
+                Expanded(
+                    child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _touchButton())),
+              ],
+            )),
+      ),
     );
   }
 
@@ -887,12 +1066,10 @@ class AppScreenState extends State<AppScreen> {
     return FlatButton(
       hoverColor: Colors.black38,
       onPressed: () {
-        if (_showShortcutOverlay) {
-          if (_touchMode)
-            setDesktopMode();
-          else
-            setTouchMode();
-        }
+        if (_touchMode)
+          setDesktopMode();
+        else
+          setTouchMode();
       },
       child: SizedBox(
         width: 25,
@@ -903,22 +1080,87 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
+  double _getDrawerMenuBarSize() {
+    double _size = 60; // default DrawerMenuBar size
+    if (widget.drawer.largeDrawerWidth != null)
+      _size = widget.drawer.largeDrawerWidth;
+    else if (widget.drawer.largeDrawerWidth != null)
+      _size = widget.drawer.largeDrawerWidth;
+    if (_size < 80) _size = 80;
+    return _size;
+  }
+
+  Widget _drawerButton() {
+    return SizedBox(
+      width: _getDrawerMenuBarSize(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: FlatButton(
+              hoverColor: Colors.black38,
+              onPressed: () {
+                if (_drawerOpen)
+                  closeDrawer();
+                else {
+                  openDrawer();
+                }
+              },
+              child: Center(
+                child: Icon(_drawerOpen ? Icons.menu_open : Icons.menu,
+                    color: Colors.white70, size: _drawerWidth < 40 ? 16 : 18),
+              ),
+            ),
+          ),
+          Expanded(
+            child: FlatButton(
+              hoverColor: Colors.black38,
+              onPressed: () {
+                if (!_drawerOpen) {
+                  setSmallDrawer();
+                  openDrawer();
+                } else {
+                  if (_smallDrawer)
+                    setLargeDrawer();
+                  else {
+                    closeDrawer();
+                  }
+                }
+              },
+              child: Center(
+                child: Icon(Icons.switch_left_rounded,
+                    color: Colors.white70, size: _drawerWidth < 40 ? 16 : 18),
+              ),
+            ),
+          ),
+          SizedBox(width: 2, child: Container(color: Colors.white70))
+        ],
+      ),
+    );
+  }
+
   Positioned _showMenuOpen() {
     return Positioned(
-      left: (116 * _activeIndex).toDouble(),
+      left: _getDrawerMenuBarSize() + (116 * _activeIndex).toDouble(),
       top: _currentMenuHeight,
-      child: SizedBox(
-          height: (_currentMenuHeight *
-                  widget.menuList[_activeIndex].menuListItems.length)
-              .toDouble(),
-          width: widget.menuList[_activeIndex].width,
-          child: Container(
-            color: Colors.blueGrey[700],
-            child: ListView(
-              itemExtent: _currentMenuHeight,
-              children: _buildItemList(),
-            ),
-          )),
+      child: GestureDetector(
+        onLongPress: () {
+          // Do nothing if user accidentially presses longpress in the menu
+        },
+        child: SizedBox(
+            height: (_currentMenuHeight *
+                    widget.menuList[_activeIndex].menuListItems.length)
+                .toDouble(),
+            width: widget.menuList[_activeIndex].width,
+            child: Container(
+              color: Colors.blueGrey[700],
+              child: ListView(
+                itemExtent: _currentMenuHeight,
+                children: _buildItemList(),
+              ),
+            )),
+      ),
     );
   }
 
@@ -958,8 +1200,8 @@ class AppScreenState extends State<AppScreen> {
         },
         onPanUpdate: (details) {
           if (!widget.masterPaneFixedWidth)
-            _setMasterPaneWidth(
-                width: details.globalPosition.dx, constraints: constraints);
+            _setMasterPaneWidthOnPan(
+                panDx: details.globalPosition.dx, constraints: constraints);
         },
         child: SizedBox(
           width: _resizeBar.width,
