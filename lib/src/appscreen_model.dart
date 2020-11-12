@@ -54,3 +54,34 @@ ResizeBar kDefaultResizeBar = ResizeBar(
   leftColor: Colors.white,
   rightColor: Colors.blueGrey,
 );
+
+class AppDrawer {
+  final double smallDrawerWidth;
+  final Widget smallDrawer;
+  final double largeDrawerWidth;
+  final Widget largeDrawer;
+  final bool showOnDesktop;
+  final bool defaultSmall;
+  final bool autoSizing;
+  final double edgeDragOpenWidth;
+  const AppDrawer({
+    this.smallDrawerWidth = 70,
+    this.smallDrawer,
+    this.largeDrawerWidth = 100,
+    this.largeDrawer,
+    this.showOnDesktop = true,
+
+    /// Start with small (true) or large drawer (false)
+    this.defaultSmall = true,
+
+    /// When drawer is closed, the user can open it by sliding in the left side area
+    this.edgeDragOpenWidth = 40,
+
+    /// autosizing not yet implemented
+    this.autoSizing = true,
+  })  : assert(smallDrawerWidth >= 30,
+            "Has to be at least 30 for UI to render nicely!"),
+        assert(largeDrawerWidth >= 30,
+            "Has to be at least 30 for UI to render nicely!"),
+        assert(edgeDragOpenWidth >= 0, "Has to be at a positive number!");
+}

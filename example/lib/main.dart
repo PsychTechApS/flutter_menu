@@ -10,6 +10,8 @@ const Map kColorMap = {
   'Pink': Colors.pink,
   'Yellow': Colors.yellow,
   'Orange': Colors.orange,
+  'White': Colors.white,
+  'BlueGrey': Colors.blueGrey,
 };
 
 void main() {
@@ -76,6 +78,7 @@ class _ScreenState extends State<Screen> {
               masterContextMenuItem(color: 'Blue'),
               masterContextMenuItem(color: 'Purple'),
               masterContextMenuItem(color: 'Pink'),
+              masterContextMenuItem(color: 'White'),
             ],
           ),
         ),
@@ -89,6 +92,7 @@ class _ScreenState extends State<Screen> {
               detailContextMenuItem(color: 'Orange'),
               detailContextMenuItem(color: 'Pink'),
               detailContextMenuItem(color: 'Red'),
+              detailContextMenuItem(color: 'BlueGrey'),
             ],
           ),
         ),
@@ -138,9 +142,21 @@ class _ScreenState extends State<Screen> {
         ],
         masterPane: masterPane(),
         detailPane: detailPane(),
-        // masterPaneWidth: 600,
-        // masterPaneMinWidth: 400,
-        // masterPaneMaxWidth: 800,
+        drawer: AppDrawer(
+          defaultSmall: false,
+          largeDrawerWidth: 200,
+          largeDrawer: smallDrawer(),
+          smallDrawerWidth: 60,
+          smallDrawer: Container(
+              color: Colors.amber,
+              child: ListView(
+                children: [
+                  ListTile(
+                    title: Icon(Icons.ac_unit_outlined),
+                  ),
+                ],
+              )),
+        ),
         onBreakpointChange: () {
           setState(() {
             print('Breakpoint change');
@@ -151,6 +167,18 @@ class _ScreenState extends State<Screen> {
             rightColor: detailBackgroundColor),
       ),
     );
+  }
+
+  Widget smallDrawer() {
+    return Container(
+        color: Colors.amber,
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text('LargeDrawer'),
+            ),
+          ],
+        ));
   }
 
   Builder detailPane() {
