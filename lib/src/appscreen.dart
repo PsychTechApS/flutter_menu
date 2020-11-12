@@ -779,12 +779,12 @@ class AppScreenState extends State<AppScreen> {
             if (_menuIsShown && _touchMode) _menuTouchBar(),
             Row(
               children: [
-                if (_drawerOpen && _drawerEnabled) _showDrawer(),
+                if (_drawerOpen && _drawerEnabled) _buildDrawer(),
                 _masterPane(),
                 if (widget.detailPane != null)
                   Row(
                     children: [
-                      _showResizeBar(constraints),
+                      _buildResizeBar(constraints),
                       _detailPane(),
                     ],
                   ),
@@ -795,7 +795,7 @@ class AppScreenState extends State<AppScreen> {
         if (widget.detailPane != null && _touchMode == true)
           _resizeBarIcon(constraints),
         _listenForAppClick(),
-        if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
+        if (_menuIsShown && _menuIsOpen) _buildMenuOpen(),
         if (_drawerEnabled &&
             !_drawerOpen &&
             widget.drawer.edgeDragOpenWidth > 0)
@@ -828,10 +828,10 @@ class AppScreenState extends State<AppScreen> {
           ],
         ),
         _listenForAppClick(),
-        if (_menuIsShown && _menuIsOpen) _showMenuOpen(),
+        if (_menuIsShown && _menuIsOpen) _buildMenuOpen(),
         if (_showContext && _currentContextMenu != null) _showContextMenu(),
         if (_showShortcutOverlay && _shortcutLabel != null) _shortcutOverlay(),
-        if (_drawerOpen && _drawerEnabled) _showDrawer(),
+        if (_drawerOpen && _drawerEnabled) _buildOverlayDrawer(),
       ],
     );
   }
@@ -881,24 +881,28 @@ class AppScreenState extends State<AppScreen> {
     _drawerDragDelta = null;
   }
 
-  Widget _showDrawer() {
+  Widget _buildOverlayDrawer() {
     return Positioned(
       top: _masterPaneDetails.minDy,
-      child: GestureDetector(
-        onLongPressStart: (details) {
-          // Do nothing if user accidentially longpresses (do not open contextmenu)
-        },
-        onHorizontalDragUpdate: (details) {
-          _onDrawerDrag(delta: details.delta.dx);
-        },
-        onHorizontalDragEnd: (_) {
-          _onDrawerDragEnd();
-        },
-        child: Container(
-          width: _drawerWidth,
-          height: _masterPaneDetails.height,
-          child: _getActiveDrawer(),
-        ),
+      child: _buildDrawer(),
+    );
+  }
+
+  Widget _buildDrawer() {
+    return GestureDetector(
+      onLongPressStart: (details) {
+        // Do nothing if user accidentially longpresses (do not open contextmenu)
+      },
+      onHorizontalDragUpdate: (details) {
+        _onDrawerDrag(delta: details.delta.dx);
+      },
+      onHorizontalDragEnd: (_) {
+        _onDrawerDragEnd();
+      },
+      child: Container(
+        width: _drawerWidth,
+        height: _masterPaneDetails.height,
+        child: _getActiveDrawer(),
       ),
     );
   }
@@ -1129,7 +1133,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  Positioned _showMenuOpen() {
+  Positioned _buildMenuOpen() {
     return Positioned(
       left: _getDrawerMenuBarSize() + (116 * _activeIndex).toDouble(),
       top: _currentMenuHeight,
@@ -1178,7 +1182,7 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  MouseRegion _showResizeBar(BoxConstraints constraints) {
+  MouseRegion _buildResizeBar(BoxConstraints constraints) {
     return MouseRegion(
       cursor: !widget.masterPaneFixedWidth
           ? SystemMouseCursors.resizeColumn
