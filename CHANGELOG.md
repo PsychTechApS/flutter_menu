@@ -1,6 +1,7 @@
 ## [0.3.1] - 2020-11-13
 
 - New drawer example
+- new gif video for readme.md
 
 ## [0.3.0] - 2020-11-12
 
