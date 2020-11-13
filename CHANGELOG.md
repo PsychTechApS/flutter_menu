@@ -1,8 +1,11 @@
+## [0.3.1] - 2020-11-13
+
+- New drawer example
+
 ## [0.3.0] - 2020-11-12
 
 - FEATURE:  Drawer added (top left menubar icon to change or touch dragging enabled)
--           you can have a small or a large drawer or both.
-- 
+ 
 
 ## [0.2.3] - 2020-11-09
 

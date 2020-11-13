@@ -42,6 +42,8 @@ class _ScreenState extends State<Screen> {
   final ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
   String _message = "Choose a MenuItem.";
+  String _drawerTitle = 'Tap a drawerItem';
+  IconData _drawerIcon = Icons.menu;
 
   Color masterBackgroundColor = Colors.white;
   Color detailBackgroundColor = Colors.blueGrey[300];
@@ -145,17 +147,9 @@ class _ScreenState extends State<Screen> {
         drawer: AppDrawer(
           defaultSmall: false,
           largeDrawerWidth: 200,
-          largeDrawer: smallDrawer(),
+          largeDrawer: drawer(small: false),
           smallDrawerWidth: 60,
-          smallDrawer: Container(
-              color: Colors.amber,
-              child: ListView(
-                children: [
-                  ListTile(
-                    title: Icon(Icons.ac_unit_outlined),
-                  ),
-                ],
-              )),
+          smallDrawer: drawer(small: true),
         ),
         onBreakpointChange: () {
           setState(() {
@@ -169,16 +163,72 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Widget smallDrawer() {
+  Widget drawer({@required bool small}) {
     return Container(
         color: Colors.amber,
         child: ListView(
           children: [
-            ListTile(
-              title: Text('LargeDrawer'),
+            drawerButton(
+                title: 'User', icon: Icons.account_circle, small: small),
+            drawerButton(title: 'Inbox', icon: Icons.inbox, small: small),
+            drawerButton(title: 'Files', icon: Icons.save, small: small),
+            drawerButton(
+              title: 'Clients',
+              icon: Icons.supervised_user_circle,
+              small: small,
+            ),
+            drawerButton(
+              title: 'Settings',
+              icon: Icons.settings,
+              small: small,
             ),
           ],
         ));
+  }
+
+  Widget drawerButton(
+      {@required String title, @required IconData icon, @required bool small}) {
+    return small
+        ? drawerSmallButton(icon: icon, title: title)
+        : drawerLargeButton(icon: icon, title: title);
+  }
+
+  Widget drawerLargeButton({@required String title, @required IconData icon}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+          elevation: 8,
+          child: ListTile(
+            leading: Icon(icon),
+            title: Text(title),
+            onTap: () {
+              setState(() {
+                _drawerIcon = icon;
+                _drawerTitle = title;
+              });
+            },
+          )),
+    );
+  }
+
+  Widget drawerSmallButton({@required String title, @required IconData icon}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(3, 8, 3, 8),
+      child: Card(
+          elevation: 8,
+          child: SizedBox(
+            height: 40,
+            child: FlatButton(
+              onPressed: () {
+                setState(() {
+                  _drawerIcon = icon;
+                  _drawerTitle = title;
+                });
+              },
+              child: Center(child: Icon(icon, size: 30, color: Colors.black54)),
+            ),
+          )),
+    );
   }
 
   Builder detailPane() {
@@ -303,14 +353,18 @@ class _ScreenState extends State<Screen> {
                 ),
                 SizedBox(height: 80),
                 SizedBox(
-                  width: 400,
-                  height: 30,
-                  child: TextField(
-                    decoration: InputDecoration(
-                        // border: InputBorder.,
-                        hintText: 'Try me...'),
-                  ),
-                ),
+                    width: 140,
+                    height: 110,
+                    child: Card(
+                        elevation: 8,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(_drawerIcon, size: 50, color: Colors.black54),
+                            Text(_drawerTitle,
+                                style: TextStyle(color: Colors.black54)),
+                          ],
+                        ))),
                 SizedBox(height: 80),
                 ContextMenuContainer(
                   width: 300,
