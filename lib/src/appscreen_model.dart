@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../flutter_menu.dart';
 
 class Detail {
-  double height;
-  double width;
-  double minDx;
-  double minDy;
-  double maxDx;
-  double maxDy;
+  double height = 0;
+  double width = 0;
+  double minDx = 0;
+  double minDy = 0;
+  double maxDx = 0;
+  double maxDy = 0;
   // bool isShown;
   @override
   String toString() =>
@@ -21,18 +21,17 @@ class ContextMenu {
   final double height;
   final ContextMenuWidget child;
 
-  ContextMenu(
-      {@required this.child, @required this.width, @required this.height});
+  ContextMenu({required this.child, required this.width, required this.height});
 }
 
 /// Custom resizeBar: either use leftColor & rightcolor or decorations. Not both of them
 class ResizeBar {
   final double width;
-  Color leftColor;
-  Color rightColor;
-  Decoration decoration;
+  Color? leftColor;
+  Color? rightColor;
+  Decoration? decoration;
   final double helperSize;
-  Decoration helperDecoration;
+  Decoration? helperDecoration;
 
   final double helperPos;
 
@@ -57,9 +56,9 @@ ResizeBar kDefaultResizeBar = ResizeBar(
 
 class AppDrawer {
   final double smallDrawerWidth;
-  final Widget smallDrawer;
+  final Widget? smallDrawer;
   final double largeDrawerWidth;
-  final Widget largeDrawer;
+  final Widget? largeDrawer;
   final bool showOnDesktop;
   final bool defaultSmall;
   final bool autoSizing;

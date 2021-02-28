@@ -13,7 +13,6 @@ class ContextMenuSliver extends ContextMenuWidget {
   final List<Widget> children;
 
   ContextMenuSliver({
-    Key key,
     this.title = 'Menu',
     this.height = 200,
     this.width = 150,
@@ -60,12 +59,11 @@ class ContextMenuItem extends ContextMenuItemType {
   final Widget child;
 
   ContextMenuItem({
-    Key key,
-    this.onTap,
-    this.child,
+    required this.onTap,
+    required this.child,
   });
   @override
   Widget build(BuildContext context) {
-    return InkWell(onTap: onTap, child: child);
+    return InkWell(onTap: onTap(), child: child);
   }
 }

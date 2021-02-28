@@ -16,10 +16,10 @@ typedef MenuBuilderCallback = Widget Function();
 
 /// Menu shows an menu, enables keyboard shortcuts to MenuItems and give master/detail panes
 class AppScreen extends StatefulWidget {
-  final List<MenuItem> menuList;
+  final List<MenuItem>? menuList;
   final Builder masterPane;
 
-  final Builder detailPane;
+  final Builder? detailPane;
   final double masterPaneFlex;
   final double detailPaneFlex;
   final double masterPaneMinWidth;
@@ -27,29 +27,27 @@ class AppScreen extends StatefulWidget {
 
   final bool masterPaneFixedWidth;
   final double desktopBreakpoint;
-  final Function onBreakpointChange;
+  final Function? onBreakpointChange;
 
-  final ResizeBar resizeBar;
+  final ResizeBar? resizeBar;
 
   final AppDrawer drawer;
 
-  final Builder drawerPane;
-  final Widget leading;
-  final Widget trailing;
+  final Builder? drawerPane;
+  final Widget? leading;
+  final Widget? trailing;
 
-  final ContextMenu masterContextMenu;
-  final ContextMenu detailContextMenu;
+  final ContextMenu? masterContextMenu;
+  final ContextMenu? detailContextMenu;
 
   final bool touchMode;
   final double touchMenuBarHeight;
   final double dekstopMenuBarHeight;
 
   const AppScreen({
-    Key key,
-
     /// Use this to update ui when desktop vs compact change happens
     this.menuList,
-    this.masterPane,
+    required this.masterPane,
     this.detailPane,
     this.masterPaneFlex = 1,
     this.detailPaneFlex = 1,
@@ -68,9 +66,7 @@ class AppScreen extends StatefulWidget {
     this.touchMode = false,
     this.touchMenuBarHeight = 40,
     this.dekstopMenuBarHeight = 30,
-  })  : assert(menuList != null, "menuList is missing!"),
-        assert(masterPane != null, "masterPane is missing!"),
-        assert((masterPaneMinWidth + detailPaneMinWidth) <= desktopBreakpoint,
+  })  : assert((masterPaneMinWidth + detailPaneMinWidth) <= desktopBreakpoint,
             "Master + Detail min Width has to be less than desktopbreakpoint !"),
         assert(dekstopMenuBarHeight >= 25, "Too small for UI to look good!"),
         assert(touchMenuBarHeight >= 40, "Too small for UI to look good!"),
@@ -78,7 +74,7 @@ class AppScreen extends StatefulWidget {
 
   static AppScreenState of(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<_AppScreenInherited>()
+        .dependOnInheritedWidgetOfExactType<_AppScreenInherited>()!
         .data;
   }
 
@@ -241,7 +237,7 @@ class AppScreenState extends State<AppScreen> {
   }
 
   /// returns null if no drawer is to be shown
-  Widget _getActiveDrawer() {
+  Widget? _getActiveDrawer() {
     if (!_drawerOpen) return null;
     if (!_drawerEnabled) return null;
 
@@ -317,6 +313,7 @@ class AppScreenState extends State<AppScreen> {
 
   Future _onBreakPointChange() async {
     // Move to next tick to prevent call under build
+    if (widget.onBreakpointChange == null) return;
     Future.delayed(Duration.zero, () async {
       widget.onBreakpointChange();
     });
@@ -338,7 +335,7 @@ class AppScreenState extends State<AppScreen> {
   }
 
   void _setMasterPaneWidthOnPan(
-      {@required double panDx, @required BoxConstraints constraints}) {
+      {required double panDx, required BoxConstraints constraints}) {
     double _newMasterPaneWidth = panDx - (_drawerOpen ? _drawerWidth : 0);
     if (_maxMasterPaneWidth < widget.masterPaneMinWidth)
       _maxMasterPaneWidth = widget.masterPaneMinWidth;
@@ -409,12 +406,12 @@ class AppScreenState extends State<AppScreen> {
 
   /// Setup ContextMenu to be shown on build
   void _setupContextMenu(
-      {@required Widget menu,
-      @required double menuWidth,
-      @required double menuHeight,
-      @required Offset offset,
-      @required Detail constraints,
-      @required bool centerContextMenu}) {
+      {required Widget menu,
+      required double menuWidth,
+      required double menuHeight,
+      required Offset offset,
+      required Detail constraints,
+      required bool centerContextMenu}) {
     if (menu != null) {
       _contextAnimation = centerContextMenu; // If longpress we animate
       _calcContextMenuPosition(
@@ -437,11 +434,11 @@ class AppScreenState extends State<AppScreen> {
   }
 
   void showContextMenu(
-      {@required Offset offset,
-      @required Widget menu,
-      @required double width,
-      @required double height,
-      @required bool center}) {
+      {required Offset offset,
+      required Widget menu,
+      required double width,
+      required double height,
+      required bool center}) {
     Detail currentConstraints;
     if (_isDesktop) {
       // desktop mode
@@ -468,7 +465,7 @@ class AppScreenState extends State<AppScreen> {
 
   /// Show ContextMenu for MasterPane or DetailPane
   void _showMasterOrDetailPaneContextMenu(
-      {@required Offset offset, @required bool center}) {
+      {required Offset offset, required bool center}) {
     if (_isDesktop) {
       // desktop mode
       if (offset.dx >= detailPaneDetails.minDx) {
@@ -524,8 +521,8 @@ class AppScreenState extends State<AppScreen> {
   /// dx,dy = rightclick or longpress position
   /// currentConstraints
   void _calcContextMenuPosition(
-      {@required double positionDx,
-      @required double positionDy,
+      {required double positionDx,
+      required double positionDy,
       Detail currentConstraints,
       Size contextMenuSize = const Size(150, 200),
       bool centerContextMenu = true}) {
@@ -577,7 +574,7 @@ class AppScreenState extends State<AppScreen> {
     super.dispose();
   }
 
-  void showShortCutOverlay({@required String message}) {
+  void showShortCutOverlay({required String message}) {
     Timer(Duration(seconds: 2), () {
       // remove the label after 2 seconds
       setState(() {
@@ -808,7 +805,7 @@ class AppScreenState extends State<AppScreen> {
 
   double _drawerDragDelta;
 
-  _onDrawerDrag({@required double delta}) {
+  _onDrawerDrag({required double delta}) {
     _drawerDragDelta = delta;
   }
 
@@ -1259,8 +1256,8 @@ class _AppScreenInherited extends InheritedWidget {
 
   _AppScreenInherited({
     Key key,
-    @required Widget child,
-    @required this.data,
+    required Widget child,
+    required this.data,
   }) : super(key: key, child: child);
 
   @override

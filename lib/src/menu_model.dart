@@ -13,9 +13,9 @@ class MenuItem {
   const MenuItem({
     this.width = 170,
     this.height = 200,
-    this.title,
+    required this.title,
     this.isActive = true,
-    this.menuListItems,
+    required this.menuListItems,
   });
 
   @override
@@ -32,16 +32,16 @@ class MenuListDivider extends MenuListItemType {}
 /// Menu Items for your menuList
 class MenuListItem extends MenuListItemType {
   final String title;
-  final IconData icon;
+  final IconData? icon;
   final bool isActive;
-  final MenuShortcut shortcut;
+  final MenuShortcut? shortcut;
   final Function onPressed;
   MenuListItem({
-    this.title,
+    required this.title,
     this.icon,
     this.isActive = true,
     this.shortcut,
-    this.onPressed,
+    required this.onPressed,
   });
 
   @override
@@ -59,7 +59,7 @@ class MenuShortcut {
   final bool ctrl;
 
   MenuShortcut({
-    this.key,
+    required this.key,
     this.shift = false,
     this.alt = false,
     this.ctrl = false,
