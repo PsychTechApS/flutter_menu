@@ -1,3 +1,7 @@
+## [0.3.2] - 2021-02-28
+
+- Example updated
+
 ## [0.3.1] - 2020-11-13
 
 - New drawer example

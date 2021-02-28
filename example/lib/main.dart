@@ -26,6 +26,21 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            overlayColor: MaterialStateProperty.all(
+                Colors.blueGrey[600]), // Set Button hover color
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all(Colors.black),
+
+            backgroundColor: MaterialStateProperty.all(Colors.white),
+            overlayColor: MaterialStateProperty.all(
+                Colors.blueGrey[600]), // Set Button hover color
+          ),
+        ),
       ),
       debugShowCheckedModeBanner: false,
       home: Screen(),
@@ -218,7 +233,7 @@ class _ScreenState extends State<Screen> {
           elevation: 8,
           child: SizedBox(
             height: 40,
-            child: FlatButton(
+            child: ElevatedButton(
               onPressed: () {
                 setState(() {
                   _drawerIcon = icon;
@@ -260,7 +275,7 @@ class _ScreenState extends State<Screen> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
                         context.appScreen.closeMenu();
                       },
@@ -272,13 +287,13 @@ class _ScreenState extends State<Screen> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
                         context.appScreen.hideMenu();
                       },
                       child: Text('Hide Menu'),
                     ),
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
                         context.appScreen.showMenu();
                       },
@@ -313,7 +328,7 @@ class _ScreenState extends State<Screen> {
                 ),
                 SizedBox(height: 20),
                 if (context.appScreen.isCompact())
-                  RaisedButton(
+                  ElevatedButton(
                     onPressed: () {
                       context.appScreen.showOnlyMaster();
                     },
@@ -388,7 +403,7 @@ class _ScreenState extends State<Screen> {
                 ),
                 SizedBox(height: 20),
                 if (context.appScreen.isCompact())
-                  RaisedButton(
+                  ElevatedButton(
                     onPressed: () {
                       context.appScreen.showOnlyDetail();
                     },

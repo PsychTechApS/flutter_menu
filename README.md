@@ -1,10 +1,10 @@
 # flutter_menu
 
-This is a responsive UI framework developed for web and desktop. 
+This is a responsive UI framework developed for Web and Desktop. 
 
 Try it out: http://www.flutter.psychtech.mitspace.dk/
 
-The package gives you a desktop like experience on web (responsive to touch or desktop displays). It gives you the following:
+The package gives you a desktop like experience on web (responsive to touch and desktop displays). It gives you the following:
 
 ![Example](screenshots/example6.gif)
 
@@ -18,18 +18,19 @@ The package gives you a desktop like experience on web (responsive to touch or d
 - [x] Drawer (small or large)
 - [x] Pane sizes is set by a flex factor for the UI to stay nice and responsive.
 
+
+- [ ] different menu in compact mode (to be responsive)
 - [ ] More predefined contextmenus to choose from
 - [ ] Scrollbar
 - [ ] More callbacks on change
 - [ ] Extra topbar to be used as toolbar or information bar
 - [ ] Fullscreen dialogs
-- [ ] different menu in compact mode
 
 All siblings down the widget tree has access to the AppScreen functionality.
  
 This is a beta release and breaking changes will come soon!
 
-Get support, announcements and share knowledge of flutter web on: https://discord.gg/pmXCFZUxxC
+Get support, announcements and share knowledge: https://discord.gg/pmXCFZUxxC
 
 ## How to install
 

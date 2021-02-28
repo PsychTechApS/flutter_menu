@@ -8,10 +8,6 @@ import 'package:flutter_menu/flutter_menu.dart';
 
 import 'menu_model.dart';
 
-// Upcomming changes:
-// TODO: MENU should not overflow
-// TODO: Autosizing
-
 extension BuildContextMenuFinder on BuildContext {
   AppScreenState get appScreen => AppScreen.of(this);
 }
@@ -1026,8 +1022,7 @@ class AppScreenState extends State<AppScreen> {
   }
 
   Widget _touchButton() {
-    return FlatButton(
-      hoverColor: Colors.black38,
+    return TextButton(
       onPressed: () {
         if (_touchMode)
           setDesktopMode();
@@ -1062,8 +1057,7 @@ class AppScreenState extends State<AppScreen> {
         children: [
           SizedBox(
             width: 70,
-            child: FlatButton(
-              hoverColor: Colors.black38,
+            child: TextButton(
               onPressed: () {
                 if (!_drawerOpen) {
                   setSmallDrawer();
@@ -1174,8 +1168,7 @@ class AppScreenState extends State<AppScreen> {
       if (listItem is MenuListItem) {
         if (listItem.isActive) {
           buildItemList.add(
-            FlatButton(
-              hoverColor: Colors.black26,
+            TextButton(
               onPressed: listItem.onPressed != null
                   ? () {
                       closeMenu();
@@ -1242,8 +1235,7 @@ class AppScreenState extends State<AppScreen> {
               _activeIndex = i;
             });
           },
-          child: FlatButton(
-            hoverColor: Colors.black38,
+          child: TextButton(
             onPressed: () {
               _activeIndex = i;
               openMenu(); // Calls setState
