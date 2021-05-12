@@ -61,7 +61,7 @@ class _ScreenState extends State<Screen> {
   IconData _drawerIcon = Icons.menu;
 
   Color masterBackgroundColor = Colors.white;
-  Color detailBackgroundColor = Colors.blueGrey[300];
+  Color detailBackgroundColor = Colors.blueGrey[300]!;
 
   void _showMessage(String newMessage) {
     setState(() {
@@ -178,7 +178,7 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Widget drawer({@required bool small}) {
+  Widget drawer({required bool small}) {
     return Container(
         color: Colors.amber,
         child: ListView(
@@ -202,13 +202,13 @@ class _ScreenState extends State<Screen> {
   }
 
   Widget drawerButton(
-      {@required String title, @required IconData icon, @required bool small}) {
+      {required String title, required IconData icon, required bool small}) {
     return small
         ? drawerSmallButton(icon: icon, title: title)
         : drawerLargeButton(icon: icon, title: title);
   }
 
-  Widget drawerLargeButton({@required String title, @required IconData icon}) {
+  Widget drawerLargeButton({required String title, required IconData icon}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
@@ -226,7 +226,7 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Widget drawerSmallButton({@required String title, @required IconData icon}) {
+  Widget drawerSmallButton({required String title, required IconData icon}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(3, 8, 3, 8),
       child: Card(
@@ -433,7 +433,7 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Widget masterContextMenuItem({String color}) {
+  Widget masterContextMenuItem({required String color}) {
     return ContextMenuItem(
       onTap: () {
         _masterSetBackgroundColor(color);
@@ -445,7 +445,7 @@ class _ScreenState extends State<Screen> {
     );
   }
 
-  Widget detailContextMenuItem({String color}) {
+  Widget detailContextMenuItem({required String color}) {
     return ContextMenuItem(
       onTap: () {
         _detailSetBackgroundColor(color);
