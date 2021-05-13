@@ -19,7 +19,7 @@ class AppScreen extends StatefulWidget {
   final List<MenuItem> menuList;
   final Builder masterPane;
 
-  final Builder detailPane;
+  final Builder? detailPane;
   final double masterPaneFlex;
   final double detailPaneFlex;
   final double masterPaneMinWidth;
@@ -27,29 +27,29 @@ class AppScreen extends StatefulWidget {
 
   final bool masterPaneFixedWidth;
   final double desktopBreakpoint;
-  final Function onBreakpointChange;
+  final Function? onBreakpointChange;
 
-  final ResizeBar resizeBar;
+  final ResizeBar? resizeBar;
 
   final AppDrawer drawer;
 
-  final Builder drawerPane;
-  final Widget leading;
-  final Widget trailing;
+  final Builder? drawerPane;
+  final Widget? leading;
+  final Widget? trailing;
 
-  final ContextMenu masterContextMenu;
-  final ContextMenu detailContextMenu;
+  final ContextMenu? masterContextMenu;
+  final ContextMenu? detailContextMenu;
 
   final bool touchMode;
   final double touchMenuBarHeight;
   final double dekstopMenuBarHeight;
 
   const AppScreen({
-    Key key,
+    Key? key,
 
     /// Use this to update ui when desktop vs compact change happens
-    this.menuList,
-    this.masterPane,
+    required this.menuList,
+    required this.masterPane,
     this.detailPane,
     this.masterPaneFlex = 1,
     this.detailPaneFlex = 1,
@@ -68,9 +68,7 @@ class AppScreen extends StatefulWidget {
     this.touchMode = false,
     this.touchMenuBarHeight = 40,
     this.dekstopMenuBarHeight = 30,
-  })  : assert(menuList != null, "menuList is missing!"),
-        assert(masterPane != null, "masterPane is missing!"),
-        assert((masterPaneMinWidth + detailPaneMinWidth) <= desktopBreakpoint,
+  })  : assert((masterPaneMinWidth + detailPaneMinWidth) <= desktopBreakpoint,
             "Master + Detail min Width has to be less than desktopbreakpoint !"),
         assert(dekstopMenuBarHeight >= 25, "Too small for UI to look good!"),
         assert(touchMenuBarHeight >= 40, "Too small for UI to look good!"),
@@ -78,7 +76,7 @@ class AppScreen extends StatefulWidget {
 
   static AppScreenState of(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<_AppScreenInherited>()
+        .dependOnInheritedWidgetOfExactType<_AppScreenInherited>()!
         .data;
   }
 
@@ -95,7 +93,8 @@ class AppScreenState extends State<AppScreen> {
   bool _showShortcutOverlay = true;
   double _lastScreenWidth = 0;
   double _lastScreenHeight = 0;
-  ResizeBar _resizeBar;
+
+  late ResizeBar _resizeBar;
 
   /// True = Menu is Shown
   bool get isMenuShown => _menuIsShown;
@@ -147,7 +146,7 @@ class AppScreenState extends State<AppScreen> {
     }
   }
 
-  double _currentMenuHeight;
+  late double _currentMenuHeight;
 
   Detail _masterPaneDetails = Detail();
 
@@ -164,7 +163,7 @@ class AppScreenState extends State<AppScreen> {
   /// info about detailPane
   get screenDetails => _screenDetails;
 
-  double _masterPaneWidth;
+  late double _masterPaneWidth;
 
   bool _drawerOpen = false;
   bool _drawerEnabled = false;
@@ -241,7 +240,7 @@ class AppScreenState extends State<AppScreen> {
   }
 
   /// returns null if no drawer is to be shown
-  Widget _getActiveDrawer() {
+  Widget? _getActiveDrawer() {
     if (!_drawerOpen) return null;
     if (!_drawerEnabled) return null;
 
@@ -315,20 +314,21 @@ class AppScreenState extends State<AppScreen> {
     }
   }
 
+  // will only be called if widget.onBreakPointChange is not null
   Future _onBreakPointChange() async {
     // Move to next tick to prevent call under build
     Future.delayed(Duration.zero, () async {
-      widget.onBreakpointChange();
+      widget.onBreakpointChange!();
     });
   }
 
-  double _maxMasterPaneWidth; // Used to keep resizebar within boundaries
+  late double _maxMasterPaneWidth; // Used to keep resizebar within boundaries
 
-  void _calcPaneFlexWidth({double screenWidth}) {
+  void _calcPaneFlexWidth({required double screenWidth}) {
     double _availableWidth = screenWidth - (_drawerOpen ? _drawerWidth : 0);
     double screenFlex = widget.masterPaneFlex + widget.detailPaneFlex;
     _masterPaneWidth = _availableWidth / screenFlex * widget.masterPaneFlex;
-    // TODO: TJEK DENNE BEREGNING VED ÆNDRING I WIDTH:
+    // TODO: CHECK THIS CALCULATION IF WIDTH IS CHANGED:
     _maxMasterPaneWidth =
         _availableWidth - widget.detailPaneMinWidth - _resizeBar.width;
     if (_masterPaneWidth < widget.masterPaneMinWidth)
@@ -338,7 +338,7 @@ class AppScreenState extends State<AppScreen> {
   }
 
   void _setMasterPaneWidthOnPan(
-      {@required double panDx, @required BoxConstraints constraints}) {
+      {required double panDx, required BoxConstraints constraints}) {
     double _newMasterPaneWidth = panDx - (_drawerOpen ? _drawerWidth : 0);
     if (_maxMasterPaneWidth < widget.masterPaneMinWidth)
       _maxMasterPaneWidth = widget.masterPaneMinWidth;
@@ -389,7 +389,7 @@ class AppScreenState extends State<AppScreen> {
 
   /// Detail pane is shown. showBackButton (=true) gives backbutton in menu.
   /// If you have your own back functionality use showOnlyMaster() to get back to Master pane.
-  void showOnlyDetail({bool showBackButton}) {
+  void showOnlyDetail({bool showBackButton = true}) {
     if (!_isDesktop) {
       if (!_compactShowDetail) {
         setState(() {
@@ -401,47 +401,43 @@ class AppScreenState extends State<AppScreen> {
 
   bool _showContext = false;
   bool _contextAnimation = false;
-  Widget _currentContextMenu;
-  double _currentContextDx;
-  double _currentContextDy;
-  double _currentContextWidth;
-  double _currentContextHeight;
+  Widget? _currentContextMenu;
+  late double _currentContextDx;
+  late double _currentContextDy;
+  late double _currentContextWidth;
+  late double _currentContextHeight;
 
   /// Setup ContextMenu to be shown on build
   void _setupContextMenu(
-      {@required Widget menu,
-      @required double menuWidth,
-      @required double menuHeight,
-      @required Offset offset,
-      @required Detail constraints,
-      @required bool centerContextMenu}) {
-    if (menu != null) {
-      _contextAnimation = centerContextMenu; // If longpress we animate
-      _calcContextMenuPosition(
-          positionDx: offset.dx,
-          positionDy: offset.dy,
-          contextMenuSize: Size(menuWidth, menuHeight),
-          currentConstraints: constraints,
-          centerContextMenu: centerContextMenu);
-      _currentContextWidth = menuWidth;
-      _currentContextHeight = menuHeight;
+      {required Widget menu,
+      required double menuWidth,
+      required double menuHeight,
+      required Offset offset,
+      required Detail constraints,
+      required bool centerContextMenu}) {
+    _contextAnimation = centerContextMenu; // If longpress we animate
+    _calcContextMenuPosition(
+        positionDx: offset.dx,
+        positionDy: offset.dy,
+        contextMenuSize: Size(menuWidth, menuHeight),
+        currentConstraints: constraints,
+        centerContextMenu: centerContextMenu);
+    _currentContextWidth = menuWidth;
+    _currentContextHeight = menuHeight;
 
-      _currentContextMenu = menu;
-      setState(() {
-        _showContext = true;
-      });
-    } else
-      setState(() {
-        _showContext = false;
-      });
+    _currentContextMenu = menu;
+    setState(() {
+      _showContext = true;
+    });
   }
 
+  /// Show ContextMenu
   void showContextMenu(
-      {@required Offset offset,
-      @required Widget menu,
-      @required double width,
-      @required double height,
-      @required bool center}) {
+      {required Offset offset,
+      required Widget menu,
+      required double width,
+      required double height,
+      required bool center}) {
     Detail currentConstraints;
     if (_isDesktop) {
       // desktop mode
@@ -468,23 +464,24 @@ class AppScreenState extends State<AppScreen> {
 
   /// Show ContextMenu for MasterPane or DetailPane
   void _showMasterOrDetailPaneContextMenu(
-      {@required Offset offset, @required bool center}) {
+      {required Offset offset, required bool center}) {
     if (_isDesktop) {
       // desktop mode
-      if (offset.dx >= detailPaneDetails.minDx) {
+      if (offset.dx >= detailPaneDetails.minDx &&
+          widget.detailContextMenu != null) {
         _setupContextMenu(
-          menu: widget.detailContextMenu.child,
-          menuWidth: widget.detailContextMenu.width,
-          menuHeight: widget.detailContextMenu.height,
+          menu: widget.detailContextMenu!.child,
+          menuWidth: widget.detailContextMenu!.width,
+          menuHeight: widget.detailContextMenu!.height,
           offset: offset,
           constraints: detailPaneDetails,
           centerContextMenu: center,
         );
-      } else {
+      } else if (widget.masterContextMenu != null) {
         _setupContextMenu(
-          menu: widget.masterContextMenu.child,
-          menuWidth: widget.masterContextMenu.width,
-          menuHeight: widget.masterContextMenu.height,
+          menu: widget.masterContextMenu!.child,
+          menuWidth: widget.masterContextMenu!.width,
+          menuHeight: widget.masterContextMenu!.height,
           offset: offset,
           constraints: masterPaneDetails,
           centerContextMenu: center,
@@ -492,20 +489,20 @@ class AppScreenState extends State<AppScreen> {
       }
     } else {
       // Compact mode
-      if (_compactShowDetail) {
+      if (_compactShowDetail && widget.detailContextMenu != null) {
         _setupContextMenu(
-          menu: widget.detailContextMenu.child,
-          menuWidth: widget.detailContextMenu.width,
-          menuHeight: widget.detailContextMenu.height,
+          menu: widget.detailContextMenu!.child,
+          menuWidth: widget.detailContextMenu!.width,
+          menuHeight: widget.detailContextMenu!.height,
           offset: offset,
           constraints: detailPaneDetails,
           centerContextMenu: center,
         );
-      } else {
+      } else if (widget.masterContextMenu != null) {
         _setupContextMenu(
-          menu: widget.masterContextMenu.child,
-          menuWidth: widget.masterContextMenu.width,
-          menuHeight: widget.masterContextMenu.height,
+          menu: widget.masterContextMenu!.child,
+          menuWidth: widget.masterContextMenu!.width,
+          menuHeight: widget.masterContextMenu!.height,
           offset: offset,
           constraints: masterPaneDetails,
           centerContextMenu: center,
@@ -524,27 +521,19 @@ class AppScreenState extends State<AppScreen> {
   /// dx,dy = rightclick or longpress position
   /// currentConstraints
   void _calcContextMenuPosition(
-      {@required double positionDx,
-      @required double positionDy,
-      Detail currentConstraints,
+      {required double positionDx,
+      required double positionDy,
+      required Detail currentConstraints,
       Size contextMenuSize = const Size(150, 200),
       bool centerContextMenu = true}) {
-    currentConstraints = currentConstraints ?? _detailPaneDetails;
-    // prerequists
-    // print('Currentconstraints: $currentConstraints');
-
     _currentContextDx = positionDx;
     _currentContextDy = positionDy;
-    // print('START DX: $_dxContext, DY: $_dyContext');
 
     if (centerContextMenu) {
       // adjust position to center
       _currentContextDx = positionDx - (contextMenuSize.width / 2);
       _currentContextDy = positionDy - (contextMenuSize.height / 2);
     }
-    // print('Center DX: $_dxContext, DY: $_dyContext');
-    // check if inside boundaries
-    // I need current boundaries...
 
     // get MaxOffset for the contextmenu to bee inside Pane
     double contextMenuMaxDx =
@@ -569,7 +558,7 @@ class AppScreenState extends State<AppScreen> {
   }
 
   final FocusNode _focusNode = FocusNode();
-  String _shortcutLabel;
+  String? _shortcutLabel;
 
   @override
   void dispose() {
@@ -577,7 +566,8 @@ class AppScreenState extends State<AppScreen> {
     super.dispose();
   }
 
-  void showShortCutOverlay({@required String message}) {
+  /// Show ShortCut overlay with 2 seconds timer
+  void showShortCutOverlay({required String message}) {
     Timer(Duration(seconds: 2), () {
       // remove the label after 2 seconds
       setState(() {
@@ -597,16 +587,16 @@ class AppScreenState extends State<AppScreen> {
         menuList.menuListItems.forEach((listItem) {
           if (listItem is MenuListItem) {
             if (listItem.shortcut != null &&
-                event.isControlPressed == listItem.shortcut.ctrl &&
-                event.isAltPressed == listItem.shortcut.alt &&
-                event.isShiftPressed == listItem.shortcut.shift &&
-                event.logicalKey == listItem.shortcut.key) {
+                event.isControlPressed == listItem.shortcut!.ctrl &&
+                event.isAltPressed == listItem.shortcut!.alt &&
+                event.isShiftPressed == listItem.shortcut!.shift &&
+                event.logicalKey == listItem.shortcut!.key) {
               if (_showShortcutOverlay) {
-                showShortCutOverlay(message: _shortcutText(listItem.shortcut));
+                showShortCutOverlay(message: _shortcutText(listItem.shortcut!));
               }
               if (listItem.onPressed != null) {
                 closeMenu();
-                listItem.onPressed();
+                listItem.onPressed!();
               }
             }
           }
@@ -618,13 +608,13 @@ class AppScreenState extends State<AppScreen> {
   void _setResizeBarColor() {
     _resizeBar.decoration = BoxDecoration(
       gradient: LinearGradient(
-          colors: [_resizeBar.leftColor, _resizeBar.rightColor],
+          colors: [_resizeBar.leftColor!, _resizeBar.rightColor!],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight),
     );
     _resizeBar.helperDecoration = BoxDecoration(
       gradient: LinearGradient(
-          colors: [_resizeBar.rightColor, _resizeBar.leftColor],
+          colors: [_resizeBar.rightColor!, _resizeBar.leftColor!],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight),
     );
@@ -685,7 +675,7 @@ class AppScreenState extends State<AppScreen> {
     _setupDrawer();
     _setupMenu();
     if (widget.masterContextMenu != null)
-      _currentContextMenu = widget.masterContextMenu.child;
+      _currentContextMenu = widget.masterContextMenu!.child;
     super.initState();
   }
 
@@ -695,7 +685,7 @@ class AppScreenState extends State<AppScreen> {
       data: this,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          _setupResizeBar();
+          //  _setupResizeBar(); // TODO: Why called two times (also on initState)
           _handleConstraintChange(constraints);
           _calcScreenAndPaneSize(constraints);
 
@@ -806,21 +796,21 @@ class AppScreenState extends State<AppScreen> {
     );
   }
 
-  double _drawerDragDelta;
+  double? _drawerDragDelta;
 
-  _onDrawerDrag({@required double delta}) {
+  _onDrawerDrag({required double delta}) {
     _drawerDragDelta = delta;
   }
 
   _onDrawerDragEnd() {
     if (_drawerDragDelta != null && _drawerOpen) {
       if (_smallDrawer) {
-        if (_drawerDragDelta < 0)
+        if (_drawerDragDelta! < 0)
           closeDrawer();
         else
           setLargeDrawer();
       } else {
-        if (_drawerDragDelta > 0) //
+        if (_drawerDragDelta! > 0) //
         {
           // Do nothing - drawer cannot be bigger
         } else
@@ -911,7 +901,7 @@ class AppScreenState extends State<AppScreen> {
       top: _currentContextDy,
       child: TweenAnimationBuilder(
         duration: Duration(milliseconds: 200),
-        builder: (BuildContext context, value, Widget child) {
+        builder: (BuildContext context, dynamic value, Widget? child) {
           return Transform.scale(
             scale: value,
             alignment: Alignment.center,
@@ -958,7 +948,7 @@ class AppScreenState extends State<AppScreen> {
                 if (widget.leading != null)
                   Row(
                     children: [
-                      widget.leading,
+                      widget.leading!,
                       Padding(
                         padding: const EdgeInsets.only(left: 4, right: 4),
                         child: SizedBox(
@@ -967,10 +957,9 @@ class AppScreenState extends State<AppScreen> {
                       ),
                     ],
                   ),
-                if (widget.menuList != null)
-                  Row(
-                    children: _buildMenuList(),
-                  ),
+                Row(
+                  children: _buildMenuList(),
+                ),
                 Expanded(
                     child: Align(
                         alignment: Alignment.centerRight,
@@ -998,7 +987,7 @@ class AppScreenState extends State<AppScreen> {
                 if (widget.leading != null)
                   Row(
                     children: [
-                      widget.leading,
+                      widget.leading!,
                       Padding(
                         padding: const EdgeInsets.only(left: 4, right: 4),
                         child: SizedBox(
@@ -1007,10 +996,9 @@ class AppScreenState extends State<AppScreen> {
                       ),
                     ],
                   ),
-                if (widget.menuList != null)
-                  Row(
-                    children: _buildMenuList(),
-                  ),
+                Row(
+                  children: _buildMenuList(),
+                ),
                 Expanded(
                     child: Align(
                         alignment: Alignment.centerRight,
@@ -1039,13 +1027,9 @@ class AppScreenState extends State<AppScreen> {
   }
 
   double _getDrawerMenuBarSize() {
-    double _size = 60; // default DrawerMenuBar size
-    if (widget.drawer.largeDrawerWidth != null)
-      _size = widget.drawer.largeDrawerWidth;
-    else if (widget.drawer.largeDrawerWidth != null)
-      _size = widget.drawer.largeDrawerWidth;
-    if (_size < 80) _size = 80;
-    return _size;
+    return widget.drawer.largeDrawerWidth < 80
+        ? widget.drawer.largeDrawerWidth
+        : 80;
   }
 
   Widget _drawerButton() {
@@ -1110,7 +1094,7 @@ class AppScreenState extends State<AppScreen> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Text(
-        _shortcutLabel,
+        _shortcutLabel!,
         style: TextStyle(color: Colors.blue, fontSize: 50),
       ),
     );
@@ -1172,7 +1156,7 @@ class AppScreenState extends State<AppScreen> {
               onPressed: listItem.onPressed != null
                   ? () {
                       closeMenu();
-                      listItem.onPressed();
+                      listItem.onPressed!();
                     }
                   : null,
               child: Row(
@@ -1199,7 +1183,7 @@ class AppScreenState extends State<AppScreen> {
                       // Align(
                       // alignment: Alignment.centerRight,
                       child: Text(
-                        _shortcutText(listItem.shortcut),
+                        _shortcutText(listItem.shortcut!),
                         textAlign: TextAlign.end,
                         style: TextStyle(color: Colors.white70, fontSize: 8),
                       ),
@@ -1258,9 +1242,9 @@ class _AppScreenInherited extends InheritedWidget {
   final AppScreenState data;
 
   _AppScreenInherited({
-    Key key,
-    @required Widget child,
-    @required this.data,
+    Key? key,
+    required Widget child,
+    required this.data,
   }) : super(key: key, child: child);
 
   @override
@@ -1274,9 +1258,9 @@ const String _labelAlt = ' Alt+';
 const String _labelShift = 'Shift+';
 
 String _shortcutText(MenuShortcut shortcut) {
-  // String text = '';
+  if (shortcut.key == null) return "";
   return (shortcut.ctrl ? _labelCtrl : '') +
       (shortcut.alt ? _labelAlt : '') +
       (shortcut.shift ? _labelShift : '') +
-      shortcut.key.keyLabel;
+      shortcut.key!.keyLabel;
 }

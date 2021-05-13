@@ -1,3 +1,7 @@
+# [0.4.0] - 2021-05-13
+
+* Updated to nullsafety
+
 # [0.3.2] - 2021-02-28
 
 * Example updated

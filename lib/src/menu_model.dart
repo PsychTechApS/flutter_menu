@@ -13,9 +13,9 @@ class MenuItem {
   const MenuItem({
     this.width = 170,
     this.height = 200,
-    this.title,
+    this.title = "Empty",
     this.isActive = true,
-    this.menuListItems,
+    required this.menuListItems,
   });
 
   @override
@@ -32,12 +32,12 @@ class MenuListDivider extends MenuListItemType {}
 /// Menu Items for your menuList
 class MenuListItem extends MenuListItemType {
   final String title;
-  final IconData icon;
+  final IconData? icon;
   final bool isActive;
-  final MenuShortcut shortcut;
-  final Function onPressed;
+  final MenuShortcut? shortcut;
+  final Function? onPressed;
   MenuListItem({
-    this.title,
+    required this.title,
     this.icon,
     this.isActive = true,
     this.shortcut,
@@ -53,7 +53,7 @@ class MenuListItem extends MenuListItemType {
 /// Setup a keyboard shortcut for MenuItems, notice that shift should only be used in combination with other system keys and take care
 /// that the browser takes presidence over the app for keyboard shortcuts so choose with care
 class MenuShortcut {
-  final LogicalKeyboardKey key;
+  final LogicalKeyboardKey? key;
   final bool shift;
   final bool alt;
   final bool ctrl;
