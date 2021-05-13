@@ -11,12 +11,12 @@ class ContextMenuContainer extends StatelessWidget {
   final ContextMenuWidget menu;
   final double width;
   final double height;
-  final Widget child;
+  final Widget? child;
   const ContextMenuContainer(
-      {Key key,
-      @required this.menu,
-      @required this.height,
-      @required this.width,
+      {Key? key,
+      required this.menu,
+      required this.height,
+      required this.width,
       this.child})
       : super(key: key);
   @override

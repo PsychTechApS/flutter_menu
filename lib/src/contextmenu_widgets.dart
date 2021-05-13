@@ -7,13 +7,13 @@ class ContextMenuSliver extends ContextMenuWidget {
   final double height;
   final double width;
   final Color titleBackgroundColor;
-  final TextStyle titleStyle;
+  final TextStyle? titleStyle;
   final Color widgetBackgroundColor;
 
   final List<Widget> children;
 
   ContextMenuSliver({
-    Key key,
+    Key? key,
     this.title = 'Menu',
     this.height = 200,
     this.width = 150,
@@ -55,17 +55,17 @@ class ContextMenuSliver extends ContextMenuWidget {
 }
 
 class ContextMenuItem extends ContextMenuItemType {
-  final Function onTap;
+  final Function? onTap;
 
-  final Widget child;
+  final Widget? child;
 
   ContextMenuItem({
-    Key key,
+    Key? key,
     this.onTap,
     this.child,
   });
   @override
   Widget build(BuildContext context) {
-    return InkWell(onTap: onTap, child: child);
+    return InkWell(onTap: onTap as void Function()?, child: child);
   }
 }

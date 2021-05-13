@@ -1,11 +1,11 @@
 name: flutter_menu
 description: Responsive UI framework for web and desktop - Top menu, responsive master/detail panes and context menu with keyboard shortcuts.
-version: 0.3.2
+version: 0.4.0
 repository: https://github.com/PsychTechApS/flutter_menu
 auther: PsychTech<psychtech@outlook.dk>
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
