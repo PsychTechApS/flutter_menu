@@ -314,7 +314,7 @@ class AppScreenState extends State<AppScreen> {
     }
   }
 
-  // will only be called if widget.onBreakPointChange is not null
+  /// will only be called if widget.onBreakPointChange is not null
   Future _onBreakPointChange() async {
     // Move to next tick to prevent call under build
     Future.delayed(Duration.zero, () async {
@@ -687,9 +687,11 @@ class AppScreenState extends State<AppScreen> {
         builder: (context, constraints) {
           //  _setupResizeBar(); // TODO: Why called two times (also on initState)
           _handleConstraintChange(constraints);
-          _calcScreenAndPaneSize(constraints);
 
+          // This function handles change in _isDesktop, and has to be called before _calcScreenAndPaneSize
           _handleBreakpoint(constraints);
+
+          _calcScreenAndPaneSize(constraints);
 
           return GestureDetector(
             onLongPressStart: (details) {

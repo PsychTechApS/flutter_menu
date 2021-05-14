@@ -1,3 +1,7 @@
+# [0.4.1] - 2021-05-14
+
+* BUG FIX: Issue 9: Renderflex overflow on single pane to double pane change 
+
 # [0.4.0] - 2021-05-13
 
 * Updated to nullsafety
